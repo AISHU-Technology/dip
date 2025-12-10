@@ -1,0 +1,20 @@
+openapi: 3.0.1
+
+info:
+  description: DIP-Hub 依赖的外部 API
+  version: 1.0.0
+
+paths:
+  /internal/api/deploy-installer/v1/agents/image:
+    $ref: './deploy-installer/deploy-installer.paths.yaml#/paths/agents/image'
+  /internal/api/deploy-installer/v1/agents/chart:
+    $ref: './deploy-installer/deploy-installer.paths.yaml#/paths/agents/chart'
+  /internal/api/deploy-installer/v1/agents/release/{release-name}:
+    $ref: './deploy-installer/deploy-installer.paths.yaml#/paths/agents/releases'
+
+components:
+  schemas:
+    InternalError:
+      $ref: './deploy-installer/deploy-installer.schemas.yaml#/components/schemas/InternalError'
+    ParameterError:
+      $ref: './deploy-installer/deploy-installer.schemas.yaml#/components/schemas/ParameterError'

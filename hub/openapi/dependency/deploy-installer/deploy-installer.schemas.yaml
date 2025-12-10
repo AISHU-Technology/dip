@@ -1,0 +1,40 @@
+components:
+  schemas:
+    InternalError:
+      title: ''
+      type: object
+      properties:
+        status:
+          type: integer
+          enum:
+            - 500
+        code:
+          type: integer
+          enum:
+            - 500
+        message:
+          type: string
+          title: 错误信息
+      required:
+        - status
+        - code
+        - message
+    ParameterError:
+      title: ''
+      type: object
+      properties:
+        status:
+          type: integer
+          enum:
+            - 400
+        code:
+          type: integer
+          enum:
+            - 400
+        message:
+          type: string
+          title: 错误信息
+      required:
+        - status
+        - code
+        - message
