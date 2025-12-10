@@ -1,0 +1,16 @@
+paths:
+  healthz:
+    get:
+      summary: 通用健康检查
+      tags: [Health]
+      responses:
+        "200":
+          description: 服务健康
+
+  readyz:
+    get:
+      summary: 就绪检查 (Readiness)
+      tags: [Health]
+      responses:
+        "200":
+          description: 就绪正常

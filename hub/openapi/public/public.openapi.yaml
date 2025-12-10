@@ -1,0 +1,11 @@
+openapi: 3.1.0
+info:
+  title: DIP Open API
+  version: 1.0.0
+
+servers:
+  - url: /api/dip-hub/v1/
+
+paths:
+
+components:
