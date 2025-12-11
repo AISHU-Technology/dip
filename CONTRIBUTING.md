@@ -31,6 +31,7 @@
   - `hub/backend/`：应用管理后端
   - `hub/frontend/`：应用管理前端
   - `hub/openapi/`：OpenAPI 规范
+  - `hub/dev/`：开发工具和配置
 
 ---
 
