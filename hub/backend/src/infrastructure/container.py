@@ -1,8 +1,8 @@
 """
-Dependency Injection Container
+依赖注入容器
 
-Assembles and wires all dependencies following the hexagonal architecture.
-This is where adapters are instantiated and injected into application services.
+按照六边形架构组装和连接所有依赖。
+在这里实例化适配器并注入到应用服务中。
 """
 from src.application.health_service import HealthService
 from src.adapters.health_adapter import HealthAdapter
@@ -11,18 +11,17 @@ from src.infrastructure.config.settings import Settings, get_settings
 
 class Container:
     """
-    Dependency injection container.
+    依赖注入容器。
     
-    This container assembles all the dependencies and provides
-    factory methods to create application services with their adapters.
+    该容器负责组装所有依赖，并提供工厂方法来创建带有适配器的应用服务。
     """
     
     def __init__(self, settings: Settings = None):
         """
-        Initialize the container.
+        初始化容器。
         
-        Args:
-            settings: Application settings. If None, uses default settings.
+        参数:
+            settings: 应用配置。如果为 None，则使用默认配置。
         """
         self._settings = settings or get_settings()
         self._health_adapter = None
@@ -30,43 +29,43 @@ class Container:
     
     @property
     def settings(self) -> Settings:
-        """Get the application settings."""
+        """获取应用配置。"""
         return self._settings
     
     @property
     def health_adapter(self) -> HealthAdapter:
-        """Get the health adapter instance (singleton)."""
+        """获取健康适配器实例（单例）。"""
         if self._health_adapter is None:
             self._health_adapter = HealthAdapter(self._settings)
         return self._health_adapter
     
     @property
     def health_service(self) -> HealthService:
-        """Get the health service instance (singleton)."""
+        """获取健康服务实例（单例）。"""
         if self._health_service is None:
             self._health_service = HealthService(self.health_adapter)
         return self._health_service
     
     def set_ready(self, ready: bool = True) -> None:
         """
-        Set the service ready status.
+        设置服务就绪状态。
         
-        Args:
-            ready: Whether the service is ready.
+        参数:
+            ready: 服务是否就绪。
         """
         self.health_adapter.set_ready(ready)
 
 
-# Global container instance
+# 全局容器实例
 _container: Container = None
 
 
 def get_container() -> Container:
     """
-    Get the global container instance.
+    获取全局容器实例。
     
-    Returns:
-        Container: The container instance.
+    返回:
+        Container: 容器实例。
     """
     global _container
     if _container is None:
@@ -76,15 +75,14 @@ def get_container() -> Container:
 
 def init_container(settings: Settings = None) -> Container:
     """
-    Initialize the global container.
+    初始化全局容器。
     
-    Args:
-        settings: Application settings.
+    参数:
+        settings: 应用配置。
     
-    Returns:
-        Container: The initialized container.
+    返回:
+        Container: 初始化后的容器。
     """
     global _container
     _container = Container(settings)
     return _container
-

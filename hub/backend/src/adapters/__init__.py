@@ -1,3 +1,2 @@
-# Adapters Layer
-# Contains concrete implementations of port interfaces
-
+# 适配器层
+# 包含端口接口的具体实现

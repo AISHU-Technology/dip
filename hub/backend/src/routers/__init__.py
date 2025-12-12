@@ -1,3 +1,2 @@
-# Routers Layer
-# Contains FastAPI route controllers (interface adapters)
-
+# 路由层
+# 包含 FastAPI 路由控制器（接口适配器）

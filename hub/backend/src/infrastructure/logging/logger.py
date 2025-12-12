@@ -1,7 +1,7 @@
 """
-Logging Configuration
+日志配置
 
-Provides a centralized logging configuration for the application.
+为应用程序提供集中的日志配置。
 """
 import logging
 import sys
@@ -12,22 +12,22 @@ from src.infrastructure.config.settings import Settings
 
 def setup_logging(settings: Optional[Settings] = None) -> logging.Logger:
     """
-    Setup application logging.
+    设置应用日志。
     
-    Args:
-        settings: Application settings. If None, uses default settings.
+    参数:
+        settings: 应用配置。如果为 None，则使用默认配置。
     
-    Returns:
-        logging.Logger: The configured logger.
+    返回:
+        logging.Logger: 配置完成的日志记录器。
     """
     if settings is None:
         from src.infrastructure.config.settings import get_settings
         settings = get_settings()
     
-    # Get log level
+    # 获取日志级别
     log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
     
-    # Configure root logger
+    # 配置根日志记录器
     logging.basicConfig(
         level=log_level,
         format=settings.log_format,
@@ -36,7 +36,7 @@ def setup_logging(settings: Optional[Settings] = None) -> logging.Logger:
         ]
     )
     
-    # Get application logger
+    # 获取应用日志记录器
     logger = logging.getLogger(settings.app_name)
     logger.setLevel(log_level)
     
@@ -45,13 +45,12 @@ def setup_logging(settings: Optional[Settings] = None) -> logging.Logger:
 
 def get_logger(name: str) -> logging.Logger:
     """
-    Get a logger with the specified name.
+    获取指定名称的日志记录器。
     
-    Args:
-        name: The logger name.
+    参数:
+        name: 日志记录器名称。
     
-    Returns:
-        logging.Logger: The logger.
+    返回:
+        logging.Logger: 日志记录器。
     """
     return logging.getLogger(name)
-

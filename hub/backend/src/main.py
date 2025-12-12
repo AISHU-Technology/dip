@@ -1,15 +1,15 @@
 """
-DIP Hub Application Entry Point
+DIP Hub 应用程序入口
 
-This is the main entry point for the FastAPI application.
-It assembles dependencies (injects adapter implementations) and starts the web service.
+这是 FastAPI 应用程序的主入口点。
+负责组装依赖（注入适配器实现）并启动 Web 服务。
 """
 import logging
 import sys
 from contextlib import asynccontextmanager
 from pathlib import Path
 
-# Add project root to Python path for module imports
+# 将项目根目录添加到 Python 路径，以便模块导入
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -26,40 +26,40 @@ from src.routers.health_router import create_health_router
 
 def create_app(settings: Settings = None) -> FastAPI:
     """
-    Create and configure the FastAPI application.
+    创建并配置 FastAPI 应用程序。
     
-    Args:
-        settings: Application settings. If None, uses default settings.
+    参数:
+        settings: 应用配置。如果为 None，则使用默认配置。
     
-    Returns:
-        FastAPI: The configured application.
+    返回:
+        FastAPI: 配置完成的应用实例。
     """
     if settings is None:
         settings = get_settings()
     
-    # Setup logging
+    # 设置日志
     logger = setup_logging(settings)
     
-    # Initialize dependency injection container
+    # 初始化依赖注入容器
     container = init_container(settings)
     
     @asynccontextmanager
     async def lifespan(app: FastAPI):
-        """Application lifespan manager."""
-        logger.info(f"Starting {settings.app_name} v{settings.app_version}")
-        logger.info(f"Server running on {settings.host}:{settings.port}")
+        """应用生命周期管理器。"""
+        logger.info(f"启动 {settings.app_name} v{settings.app_version}")
+        logger.info(f"服务运行在 {settings.host}:{settings.port}")
         
-        # Mark service as ready after initialization
+        # 初始化完成后标记服务为就绪状态
         container.set_ready(True)
-        logger.info("Service is ready to accept requests")
+        logger.info("服务已准备好接受请求")
         
         yield
         
-        # Cleanup on shutdown
-        logger.info("Shutting down service")
+        # 关闭时清理资源
+        logger.info("正在关闭服务")
         container.set_ready(False)
     
-    # Create FastAPI application
+    # 创建 FastAPI 应用
     app = FastAPI(
         title=settings.app_name,
         version=settings.app_version,
@@ -70,7 +70,7 @@ def create_app(settings: Settings = None) -> FastAPI:
         openapi_url=f"{settings.api_prefix}/openapi.json",
     )
     
-    # Add CORS middleware
+    # 添加 CORS 中间件
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -79,19 +79,19 @@ def create_app(settings: Settings = None) -> FastAPI:
         allow_headers=["*"],
     )
     
-    # Register routers
+    # 注册路由
     health_router = create_health_router(container.health_service)
     app.include_router(health_router, prefix=settings.api_prefix)
     
     return app
 
 
-# Create the application instance
+# 创建应用实例
 app = create_app()
 
 
 def main():
-    """Run the application using uvicorn."""
+    """使用 uvicorn 运行应用程序。"""
     settings = get_settings()
     
     uvicorn.run(
@@ -106,4 +106,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

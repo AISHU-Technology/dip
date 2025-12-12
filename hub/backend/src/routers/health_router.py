@@ -1,8 +1,8 @@
 """
-Health Check Router
+健康检查路由
 
-FastAPI router for health check endpoints.
-This is the interface adapter that handles HTTP requests and delegates to the application layer.
+健康检查端点的 FastAPI 路由。
+这是处理 HTTP 请求并委托给应用层的接口适配器。
 """
 from fastapi import APIRouter, Depends, Response, status
 
@@ -12,31 +12,31 @@ from src.routers.schemas.health import HealthResponse, ReadyResponse, ServiceInf
 
 def create_health_router(health_service: HealthService) -> APIRouter:
     """
-    Create the health check router.
+    创建健康检查路由。
     
-    Args:
-        health_service: The health service instance.
+    参数:
+        health_service: 健康服务实例。
     
-    Returns:
-        APIRouter: The configured router.
+    返回:
+        APIRouter: 配置完成的路由。
     """
-    router = APIRouter(tags=["Health"])
+    router = APIRouter(tags=["健康检查"])
     
     @router.get(
         "/health",
         response_model=HealthResponse,
-        summary="Health Check",
-        description="Check if the service is healthy.",
+        summary="健康检查",
+        description="检查服务是否健康。",
         responses={
-            200: {"description": "Service is healthy"},
-            503: {"description": "Service is unhealthy"},
+            200: {"description": "服务健康"},
+            503: {"description": "服务不健康"},
         }
     )
     async def health_check(response: Response) -> HealthResponse:
         """
-        Health check endpoint.
+        健康检查端点。
         
-        Returns the health status of the service.
+        返回服务的健康状态。
         """
         result = health_service.get_health()
         
@@ -52,20 +52,19 @@ def create_health_router(health_service: HealthService) -> APIRouter:
     @router.get(
         "/ready",
         response_model=ReadyResponse,
-        summary="Readiness Check",
-        description="Check if the service is ready to accept requests.",
+        summary="就绪检查",
+        description="检查服务是否准备好接受请求。",
         responses={
-            200: {"description": "Service is ready"},
-            503: {"description": "Service is not ready"},
+            200: {"description": "服务已就绪"},
+            503: {"description": "服务未就绪"},
         }
     )
     async def ready_check(response: Response) -> ReadyResponse:
         """
-        Readiness check endpoint.
+        就绪检查端点。
         
-        Returns the readiness status of the service.
-        This indicates whether the service has completed initialization
-        and is ready to accept traffic.
+        返回服务的就绪状态。
+        表示服务是否已完成初始化并准备好接受流量。
         """
         result = health_service.get_ready()
         
@@ -81,17 +80,16 @@ def create_health_router(health_service: HealthService) -> APIRouter:
     @router.get(
         "/info",
         response_model=ServiceInfoResponse,
-        summary="Service Info",
-        description="Get service information.",
+        summary="服务信息",
+        description="获取服务信息。",
     )
     async def service_info() -> ServiceInfoResponse:
         """
-        Service info endpoint.
+        服务信息端点。
         
-        Returns information about the service.
+        返回服务的相关信息。
         """
         info = health_service.get_service_info()
         return ServiceInfoResponse(**info)
     
     return router
-

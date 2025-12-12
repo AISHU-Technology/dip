@@ -1,8 +1,8 @@
 """
-Application Settings Configuration
+应用配置管理
 
-Uses pydantic-settings for configuration management.
-Settings can be configured via environment variables or .env file.
+使用 pydantic-settings 进行配置管理。
+配置可以通过环境变量或 .env 文件进行设置。
 """
 from functools import lru_cache
 from typing import Optional
@@ -13,10 +13,10 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """
-    Application settings.
+    应用配置。
     
-    All settings can be configured via environment variables.
-    Environment variables should be prefixed with 'DIP_HUB_'.
+    所有配置都可以通过环境变量进行设置。
+    环境变量需要以 'DIP_HUB_' 为前缀。
     """
     
     model_config = SettingsConfigDict(
@@ -26,37 +26,36 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
     
-    # Application settings
-    app_name: str = Field(default="DIP Hub", description="Application name")
-    app_version: str = Field(default="1.0.0", description="Application version")
-    debug: bool = Field(default=False, description="Debug mode")
+    # 应用配置
+    app_name: str = Field(default="DIP Hub", description="应用名称")
+    app_version: str = Field(default="1.0.0", description="应用版本")
+    debug: bool = Field(default=False, description="调试模式")
     
-    # Server settings
-    host: str = Field(default="0.0.0.0", description="Server host")
-    port: int = Field(default=8000, description="Server port")
-    workers: int = Field(default=1, description="Number of workers")
+    # 服务器配置
+    host: str = Field(default="0.0.0.0", description="服务器监听地址")
+    port: int = Field(default=8000, description="服务器监听端口")
+    workers: int = Field(default=1, description="工作进程数")
     
-    # API settings
-    api_prefix: str = Field(default="/api/internal/dip-hub/v1", description="API prefix")
+    # API 配置
+    api_prefix: str = Field(default="/api/internal/dip-hub/v1", description="API 前缀")
     
-    # Logging settings
-    log_level: str = Field(default="INFO", description="Logging level")
+    # 日志配置
+    log_level: str = Field(default="INFO", description="日志级别")
     log_format: str = Field(
         default="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        description="Logging format"
+        description="日志格式"
     )
     
-    # Health check settings
-    health_check_timeout: int = Field(default=5, description="Health check timeout in seconds")
+    # 健康检查配置
+    health_check_timeout: int = Field(default=5, description="健康检查超时时间（秒）")
 
 
 @lru_cache
 def get_settings() -> Settings:
     """
-    Get cached settings instance.
+    获取缓存的配置实例。
     
-    Returns:
-        Settings: The application settings.
+    返回:
+        Settings: 应用配置。
     """
     return Settings()
-

@@ -1,3 +1,2 @@
-# DIP Hub Application
-# Hexagonal Architecture (Ports and Adapters)
-
+# DIP Hub 应用程序
+# 六边形架构（端口-适配器架构）

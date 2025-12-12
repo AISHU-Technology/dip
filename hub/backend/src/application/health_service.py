@@ -1,8 +1,8 @@
 """
-Health Check Application Service
+健康检查应用服务
 
-Application layer service that orchestrates health check operations.
-This service uses ports (interfaces) and does not depend on any infrastructure details.
+应用层服务，负责编排健康检查操作。
+该服务使用端口（接口），不依赖任何基础设施细节。
 """
 from src.domains.health import HealthCheckResult, ReadyCheckResult
 from src.ports.health_port import HealthCheckPort
@@ -10,45 +10,43 @@ from src.ports.health_port import HealthCheckPort
 
 class HealthService:
     """
-    Application service for health check operations.
+    健康检查应用服务。
     
-    This service is part of the application layer and orchestrates
-    the business logic for health check operations through ports.
+    该服务属于应用层，通过端口编排健康检查的业务逻辑。
     """
     
     def __init__(self, health_port: HealthCheckPort):
         """
-        Initialize the health service.
+        初始化健康服务。
         
-        Args:
-            health_port: The health check port implementation (injected adapter).
+        参数:
+            health_port: 健康检查端口实现（注入的适配器）。
         """
         self._health_port = health_port
     
     def get_health(self) -> HealthCheckResult:
         """
-        Get the health status of the service.
+        获取服务的健康状态。
         
-        Returns:
-            HealthCheckResult: The health check result.
+        返回:
+            HealthCheckResult: 健康检查结果。
         """
         return self._health_port.check_health()
     
     def get_ready(self) -> ReadyCheckResult:
         """
-        Get the readiness status of the service.
+        获取服务的就绪状态。
         
-        Returns:
-            ReadyCheckResult: The readiness check result.
+        返回:
+            ReadyCheckResult: 就绪检查结果。
         """
         return self._health_port.check_ready()
     
     def get_service_info(self) -> dict:
         """
-        Get service information.
+        获取服务信息。
         
-        Returns:
-            dict: Service information.
+        返回:
+            dict: 服务信息。
         """
         return self._health_port.get_service_info()
-

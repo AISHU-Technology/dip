@@ -1,3 +1,2 @@
-# Infrastructure Layer
-# Contains adapter implementations (database, messaging, external APIs, logging)
-
+# 基础设施层
+# 包含配置、日志、依赖注入容器等基础设施组件

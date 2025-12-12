@@ -1,7 +1,7 @@
 """
-Health Domain Models
+健康检查领域模型
 
-Defines the domain models for health check and readiness check.
+定义健康检查和就绪检查的领域模型。
 """
 from dataclasses import dataclass
 from enum import Enum
@@ -9,38 +9,37 @@ from typing import Optional
 
 
 class HealthStatus(str, Enum):
-    """Health status enumeration."""
+    """健康状态枚举。"""
     HEALTHY = "healthy"
     UNHEALTHY = "unhealthy"
     DEGRADED = "degraded"
 
 
 class ReadyStatus(str, Enum):
-    """Ready status enumeration."""
+    """就绪状态枚举。"""
     READY = "ready"
     NOT_READY = "not_ready"
 
 
 @dataclass
 class HealthCheckResult:
-    """Domain model for health check result."""
+    """健康检查结果领域模型。"""
     status: HealthStatus
     message: str
     version: Optional[str] = None
     
     def is_healthy(self) -> bool:
-        """Check if the service is healthy."""
+        """检查服务是否健康。"""
         return self.status == HealthStatus.HEALTHY
 
 
 @dataclass
 class ReadyCheckResult:
-    """Domain model for ready check result."""
+    """就绪检查结果领域模型。"""
     status: ReadyStatus
     message: str
     checks: Optional[dict] = None
     
     def is_ready(self) -> bool:
-        """Check if the service is ready."""
+        """检查服务是否就绪。"""
         return self.status == ReadyStatus.READY
-

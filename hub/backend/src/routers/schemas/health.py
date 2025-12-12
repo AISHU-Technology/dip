@@ -1,7 +1,7 @@
 """
-Health Check API Schemas
+健康检查 API 数据模型
 
-Pydantic models for health check API requests and responses.
+健康检查 API 请求和响应的 Pydantic 模型。
 """
 from typing import Optional, Dict, Any
 
@@ -9,34 +9,34 @@ from pydantic import BaseModel, Field
 
 
 class HealthResponse(BaseModel):
-    """Response schema for health check endpoint."""
+    """健康检查端点的响应模型。"""
     
-    status: str = Field(..., description="Health status (healthy, unhealthy, degraded)")
-    message: str = Field(..., description="Health status message")
-    version: Optional[str] = Field(None, description="Service version")
+    status: str = Field(..., description="健康状态（healthy, unhealthy, degraded）")
+    message: str = Field(..., description="健康状态消息")
+    version: Optional[str] = Field(None, description="服务版本")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "status": "healthy",
-                "message": "Service is healthy",
+                "message": "服务运行正常",
                 "version": "1.0.0"
             }
         }
 
 
 class ReadyResponse(BaseModel):
-    """Response schema for ready check endpoint."""
+    """就绪检查端点的响应模型。"""
     
-    status: str = Field(..., description="Ready status (ready, not_ready)")
-    message: str = Field(..., description="Ready status message")
-    checks: Optional[Dict[str, Any]] = Field(None, description="Detailed check results")
+    status: str = Field(..., description="就绪状态（ready, not_ready）")
+    message: str = Field(..., description="就绪状态消息")
+    checks: Optional[Dict[str, Any]] = Field(None, description="详细检查结果")
     
     class Config:
         json_schema_extra = {
             "example": {
                 "status": "ready",
-                "message": "Service is ready to accept requests",
+                "message": "服务已准备好接受请求",
                 "checks": {
                     "uptime_seconds": 120.5,
                     "dependencies": "ok"
@@ -46,11 +46,11 @@ class ReadyResponse(BaseModel):
 
 
 class ServiceInfoResponse(BaseModel):
-    """Response schema for service info endpoint."""
+    """服务信息端点的响应模型。"""
     
-    name: str = Field(..., description="Service name")
-    version: str = Field(..., description="Service version")
-    uptime_seconds: float = Field(..., description="Service uptime in seconds")
+    name: str = Field(..., description="服务名称")
+    version: str = Field(..., description="服务版本")
+    uptime_seconds: float = Field(..., description="服务运行时间（秒）")
     
     class Config:
         json_schema_extra = {
@@ -60,4 +60,3 @@ class ServiceInfoResponse(BaseModel):
                 "uptime_seconds": 120.5
             }
         }
-

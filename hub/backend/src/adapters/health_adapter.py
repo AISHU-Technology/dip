@@ -1,8 +1,8 @@
 """
-Health Check Adapter
+健康检查适配器
 
-Infrastructure adapter that implements the HealthCheckPort interface.
-This is the concrete implementation that the application uses for health checks.
+实现 HealthCheckPort 接口的基础设施适配器。
+这是应用程序用于健康检查的具体实现。
 """
 import time
 from typing import Dict, Any
@@ -19,18 +19,17 @@ from src.infrastructure.config.settings import Settings
 
 class HealthAdapter(HealthCheckPort):
     """
-    Health check adapter implementation.
+    健康检查适配器实现。
     
-    This adapter implements the HealthCheckPort interface and provides
-    the concrete implementation for health check operations.
+    该适配器实现了 HealthCheckPort 接口，提供健康检查操作的具体实现。
     """
     
     def __init__(self, settings: Settings):
         """
-        Initialize the health adapter.
+        初始化健康适配器。
         
-        Args:
-            settings: Application settings.
+        参数:
+            settings: 应用配置。
         """
         self._settings = settings
         self._start_time = time.time()
@@ -38,39 +37,39 @@ class HealthAdapter(HealthCheckPort):
     
     def set_ready(self, ready: bool = True) -> None:
         """
-        Set the ready status.
+        设置就绪状态。
         
-        Args:
-            ready: Whether the service is ready.
+        参数:
+            ready: 服务是否就绪。
         """
         self._is_ready = ready
     
     def check_health(self) -> HealthCheckResult:
         """
-        Perform a health check.
+        执行健康检查。
         
-        Returns:
-            HealthCheckResult: The result of the health check.
+        返回:
+            HealthCheckResult: 健康检查结果。
         """
         return HealthCheckResult(
             status=HealthStatus.HEALTHY,
-            message="Service is healthy",
+            message="服务运行正常",
             version=self._settings.app_version,
         )
     
     def check_ready(self) -> ReadyCheckResult:
         """
-        Perform a readiness check.
+        执行就绪检查。
         
-        Returns:
-            ReadyCheckResult: The result of the readiness check.
+        返回:
+            ReadyCheckResult: 就绪检查结果。
         """
         uptime = time.time() - self._start_time
         
         if self._is_ready:
             return ReadyCheckResult(
                 status=ReadyStatus.READY,
-                message="Service is ready to accept requests",
+                message="服务已准备好接受请求",
                 checks={
                     "uptime_seconds": round(uptime, 2),
                     "dependencies": "ok",
@@ -79,7 +78,7 @@ class HealthAdapter(HealthCheckPort):
         else:
             return ReadyCheckResult(
                 status=ReadyStatus.NOT_READY,
-                message="Service is not ready yet",
+                message="服务尚未就绪",
                 checks={
                     "uptime_seconds": round(uptime, 2),
                     "dependencies": "initializing",
@@ -88,14 +87,13 @@ class HealthAdapter(HealthCheckPort):
     
     def get_service_info(self) -> Dict[str, Any]:
         """
-        Get service information.
+        获取服务信息。
         
-        Returns:
-            Dict[str, Any]: Service information.
+        返回:
+            Dict[str, Any]: 服务信息。
         """
         return {
             "name": self._settings.app_name,
             "version": self._settings.app_version,
             "uptime_seconds": round(time.time() - self._start_time, 2),
         }
-

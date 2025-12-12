@@ -1,3 +1,2 @@
-# Application Layer
-# Contains application services and use cases
-
+# 应用层
+# 包含应用服务和业务用例

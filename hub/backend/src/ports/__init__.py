@@ -1,3 +1,2 @@
-# Ports Layer
-# Contains port interface definitions (repository interfaces, third-party service interfaces)
-
+# 端口层
+# 包含端口接口定义（仓库接口、第三方服务接口等）

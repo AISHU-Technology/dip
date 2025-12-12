@@ -1,9 +1,8 @@
 """
-Health Check Port Interfaces
+健康检查端口接口
 
-Defines the abstract interfaces (ports) for health check operations.
-Following the hexagonal architecture pattern, these ports define
-the contract between the domain layer and the infrastructure layer.
+定义健康检查操作的抽象接口（端口）。
+遵循六边形架构模式，这些端口定义了领域层与基础设施层之间的契约。
 """
 from abc import ABC, abstractmethod
 from typing import Dict, Any
@@ -13,39 +12,37 @@ from src.domains.health import HealthCheckResult, ReadyCheckResult
 
 class HealthCheckPort(ABC):
     """
-    Port interface for health check operations.
+    健康检查端口接口。
     
-    This is an output port (driven port) that defines
-    how the application interacts with external health check mechanisms.
+    这是一个输出端口（被驱动端口），定义了应用程序与外部健康检查机制的交互方式。
     """
     
     @abstractmethod
     def check_health(self) -> HealthCheckResult:
         """
-        Perform a health check.
+        执行健康检查。
         
-        Returns:
-            HealthCheckResult: The result of the health check.
+        返回:
+            HealthCheckResult: 健康检查结果。
         """
         pass
     
     @abstractmethod
     def check_ready(self) -> ReadyCheckResult:
         """
-        Perform a readiness check.
+        执行就绪检查。
         
-        Returns:
-            ReadyCheckResult: The result of the readiness check.
+        返回:
+            ReadyCheckResult: 就绪检查结果。
         """
         pass
     
     @abstractmethod
     def get_service_info(self) -> Dict[str, Any]:
         """
-        Get service information.
+        获取服务信息。
         
-        Returns:
-            Dict[str, Any]: Service information including version, name, etc.
+        返回:
+            Dict[str, Any]: 服务信息，包括版本、名称等。
         """
         pass
-
