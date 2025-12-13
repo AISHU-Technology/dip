@@ -5,7 +5,9 @@
 在这里实例化适配器并注入到应用服务中。
 """
 from src.application.health_service import HealthService
+from src.application.application_service import ApplicationService
 from src.adapters.health_adapter import HealthAdapter
+from src.adapters.application_adapter import ApplicationAdapter
 from src.infrastructure.config.settings import Settings, get_settings
 
 
@@ -19,13 +21,15 @@ class Container:
     def __init__(self, settings: Settings = None):
         """
         初始化容器。
-        
+
         参数:
             settings: 应用配置。如果为 None，则使用默认配置。
         """
         self._settings = settings or get_settings()
         self._health_adapter = None
         self._health_service = None
+        self._application_adapter = None
+        self._application_service = None
     
     @property
     def settings(self) -> Settings:
@@ -45,15 +49,38 @@ class Container:
         if self._health_service is None:
             self._health_service = HealthService(self.health_adapter)
         return self._health_service
-    
+
+    @property
+    def application_adapter(self) -> ApplicationAdapter:
+        """获取应用适配器实例（单例）。"""
+        if self._application_adapter is None:
+            self._application_adapter = ApplicationAdapter(self._settings)
+        return self._application_adapter
+
+    @property
+    def application_service(self) -> ApplicationService:
+        """获取应用服务实例（单例）。"""
+        if self._application_service is None:
+            self._application_service = ApplicationService(self.application_adapter)
+        return self._application_service
+
     def set_ready(self, ready: bool = True) -> None:
         """
         设置服务就绪状态。
-        
+
         参数:
             ready: 服务是否就绪。
         """
         self.health_adapter.set_ready(ready)
+
+    async def close(self) -> None:
+        """
+        关闭容器，释放资源。
+
+        关闭数据库连接池等资源。
+        """
+        if self._application_adapter is not None:
+            await self._application_adapter.close()
 
 
 # 全局容器实例

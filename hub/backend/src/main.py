@@ -22,6 +22,7 @@ from src.infrastructure.config.settings import get_settings, Settings
 from src.infrastructure.container import init_container, get_container
 from src.infrastructure.logging.logger import setup_logging
 from src.routers.health_router import create_health_router
+from src.routers.application_router import create_application_router
 
 
 def create_app(settings: Settings = None) -> FastAPI:
@@ -48,16 +49,20 @@ def create_app(settings: Settings = None) -> FastAPI:
         """应用生命周期管理器。"""
         logger.info(f"启动 {settings.app_name} v{settings.app_version}")
         logger.info(f"服务运行在 {settings.host}:{settings.port}")
-        
+
         # 初始化完成后标记服务为就绪状态
         container.set_ready(True)
         logger.info("服务已准备好接受请求")
-        
+
         yield
-        
+
         # 关闭时清理资源
         logger.info("正在关闭服务")
         container.set_ready(False)
+
+        # 关闭数据库连接池
+        await container.close()
+        logger.info("资源已释放")
     
     # 创建 FastAPI 应用
     app = FastAPI(
@@ -82,7 +87,10 @@ def create_app(settings: Settings = None) -> FastAPI:
     # 注册路由
     health_router = create_health_router(container.health_service)
     app.include_router(health_router, prefix=settings.api_prefix)
-    
+
+    application_router = create_application_router(container.application_service)
+    app.include_router(application_router, prefix=settings.api_prefix)
+
     return app
 
 

@@ -37,7 +37,7 @@ class Settings(BaseSettings):
     workers: int = Field(default=1, description="工作进程数")
     
     # API 配置
-    api_prefix: str = Field(default="/api/internal/dip-hub/v1", description="API 前缀")
+    api_prefix: str = Field(default="/api/dip-hub/v1", description="API 前缀")
     
     # 日志配置
     log_level: str = Field(default="INFO", description="日志级别")
