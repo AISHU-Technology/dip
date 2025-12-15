@@ -32,18 +32,12 @@ const Container = ({ children }: ContainerProps) => {
   // 默认值：如果当前路由没有设置，则默认都是 false
   const { hasSider = false, hasHeader = false } = layoutConfig || {}
 
-  const headerHeight = 16 // h-[16px]
+  const headerHeight = 52
 
   return (
-    <Layout className="min-h-screen">
+    <Layout className="overflow-hidden">
       {hasHeader && <Header />}
-      <Layout
-        className="flex-row"
-        style={{
-          marginTop: hasHeader ? headerHeight : 0,
-          minHeight: hasHeader ? `calc(100vh - ${headerHeight}px)` : '100vh',
-        }}
-      >
+      <Layout>
         {hasSider && (
           <Sidebar
             collapsed={collapsed}
@@ -52,13 +46,14 @@ const Container = ({ children }: ContainerProps) => {
           />
         )}
         <Layout
-          className="transition-all duration-200"
+          className="transition-all duration-200 flex"
           style={{
-            marginLeft: hasSider ? (collapsed ? 80 : 240) : 0,
-            width: hasSider ? `calc(100% - ${collapsed ? 80 : 240}px)` : '100%',
+            height: hasHeader ? `calc(100vh - ${headerHeight}px)` : '100vh',
           }}
         >
-          <Content className="bg-gray-50">{children}</Content>
+          <Content className="relative min-w-[1040px] m-0 flex-1">
+            {children}
+          </Content>
         </Layout>
       </Layout>
     </Layout>

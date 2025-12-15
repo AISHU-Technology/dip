@@ -1,16 +1,19 @@
 import { PushpinFilled, PushpinOutlined } from '@ant-design/icons'
 import { AppFixedStatus, type AppInfo } from '@/apis/app-development'
-import { AppStoreActionEnum, ModeEnum } from './types'
+import { ModeEnum } from './types'
+import { AppStoreActionEnum } from '@/pages/AppStore/types'
 import IconFont from '../IconFont'
 
 // 卡片的最小宽度
 export const minCardWidth = 380
 // 卡片的最大宽度
 export const maxCardWidth = 500
+// 卡片的高度
+export const cardHeight = 171
 // 卡片的间距
 export const gap = 16
 // 正常卡片的高度（包含间距）
-export const rowHeight = 171 + gap
+export const rowHeight = cardHeight + gap
 // loadingMore 行的高度
 export const loadingMoreRowHeight = 30
 

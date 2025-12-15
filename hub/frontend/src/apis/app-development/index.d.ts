@@ -35,7 +35,9 @@ export interface AppInfo {
   /** 创建人名称 */
   createdByName?: string
   /** 应用固定状态 */
-  fixedStatus?: AppFixedStatus
+  fixedStatus?: valueof<AppFixedStatus>
+  /** 应用类型 */
+  appType?: string
 }
 
 /**

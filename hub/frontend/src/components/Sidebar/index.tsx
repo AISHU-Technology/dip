@@ -288,7 +288,6 @@ const Sidebar = ({ collapsed, onCollapse, topOffset = 0 }: SidebarProps) => {
       trigger={null}
       className="bg-white/85 backdrop-blur-[6px] shadow-[inset_-1px_0_0_rgba(0,0,0,0.1)]"
       style={{
-        position: 'fixed',
         left: 0,
         width: siderWidth,
         height: `calc(100vh - ${topOffset}px)`,
@@ -342,7 +341,11 @@ const Sidebar = ({ collapsed, onCollapse, topOffset = 0 }: SidebarProps) => {
           </div>
 
           <div className="mt-3 pt-3 border-t border-[rgba(0,0,0,0.1)]">
-            <Dropdown menu={{ items: userMenuItems }} placement="topLeft">
+            <Dropdown
+              menu={{ items: userMenuItems }}
+              placement="topLeft"
+              trigger={['click']}
+            >
               <div className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl bg-[rgba(241,247,254,0.7)] cursor-pointer">
                 <Avatar
                   icon={<UserOutlined />}
