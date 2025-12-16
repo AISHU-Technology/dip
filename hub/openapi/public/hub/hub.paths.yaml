@@ -1,8 +1,23 @@
 paths:
+  # ============ 1、安装应用 ============
   /applications:
     post:
       operationId: installApplication
       summary: 安装应用
+      description: |
+        安装应用包，使用流式上传。
+        
+        **流程说明：**
+        1. 上传 zip 格式安装包（流式上传）
+        2. Server 端边接收边写盘
+        3. 校验应用安装包结构和 manifest.yaml
+        4. 解析 application.key，校验 version
+        5. 如果应用已存在，版本号必须大于已上传版本
+        6. 解压安装包，上传镜像和 Chart
+        7. 导入业务知识网络和 DataAgent 智能体
+        8. 更新应用信息
+      tags:
+        - Application
       requestBody:
         required: true
         content:
@@ -10,7 +25,7 @@ paths:
             schema:
               type: string
               format: binary
-              description: 应用安装包二进制文件
+              description: zip 格式应用安装包（流式上传）
       responses:
         "200":
           description: 安装成功
@@ -20,12 +35,18 @@ paths:
                 $ref: './hub.schemas.yaml#/components/schemas/Application'
         "400":
           $ref: './hub.schemas.yaml#/components/errors/ParameterError'
+        "409":
+          $ref: './hub.schemas.yaml#/components/errors/ConflictError'
         "500":
           $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
 
+    # ============ 2、获取应用列表 ============
     get:
       operationId: listApplications
       summary: 获取应用列表
+      description: 获取当前已安装的所有应用列表。
+      tags:
+        - Application
       responses:
         '200':
           description: 获取已安装的应用列表
@@ -33,15 +54,163 @@ paths:
             application/json:
               schema:
                 $ref: './hub.schemas.yaml#/components/schemas/ApplicationList'
-        "400":
-          $ref: './hub.schemas.yaml#/components/errors/ParameterError'
         "500":
           $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
 
+  # ============ 3、应用配置 ============
+  /applications/config:
+    put:
+      operationId: configureApplication
+      summary: 配置应用
+      description: 配置应用的业务知识网络和智能体。
+      tags:
+        - Application
+      parameters:
+        - name: app_id
+          in: query
+          description: 应用 ID（key）
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './hub.schemas.yaml#/components/schemas/ApplicationConfigRequest'
+      responses:
+        '200':
+          description: 配置成功
+          content:
+            application/json:
+              schema:
+                $ref: './hub.schemas.yaml#/components/schemas/Application'
+        "400":
+          $ref: './hub.schemas.yaml#/components/errors/ParameterError'
+        "404":
+          $ref: './hub.schemas.yaml#/components/errors/NotFoundError'
+        "500":
+          $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
+
+  # ============ 4.1、查看基础信息 ============
+  /applications/basic-info:
+    get:
+      operationId: getApplicationBasicInfo
+      summary: 查看应用基础信息
+      description: |
+        查看应用的基本信息，包括：
+        - 名称
+        - 描述
+        - 版本
+        - 是否配置视图
+      tags:
+        - Application
+      parameters:
+        - name: app_id
+          in: query
+          description: 应用 ID（key）
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      responses:
+        '200':
+          description: 获取基础信息成功
+          content:
+            application/json:
+              schema:
+                $ref: './hub.schemas.yaml#/components/schemas/ApplicationBasicInfo'
+        "400":
+          $ref: './hub.schemas.yaml#/components/errors/ParameterError'
+        "404":
+          $ref: './hub.schemas.yaml#/components/errors/NotFoundError'
+        "500":
+          $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
+
+  # ============ 4.2、查看业务知识网络配置情况 ============
+  /applications/ontologies:
+    get:
+      operationId: getApplicationOntologies
+      summary: 查看业务知识网络配置
+      description: |
+        查看应用的业务知识网络配置情况。
+        
+        **流程：**
+        1. 查询应用的业务知识网络 IDs
+        2. 遍历查询业务知识网络详情获取名称、描述
+      tags:
+        - Application
+      parameters:
+        - name: app_id
+          in: query
+          description: 应用 ID（key）
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      responses:
+        '200':
+          description: 获取业务知识网络配置成功
+          content:
+            application/json:
+              schema:
+                $ref: './hub.schemas.yaml#/components/schemas/OntologyList'
+        "400":
+          $ref: './hub.schemas.yaml#/components/errors/ParameterError'
+        "404":
+          $ref: './hub.schemas.yaml#/components/errors/NotFoundError'
+        "500":
+          $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
+
+  # ============ 4.3、查看智能体 ============
+  /applications/agents:
+    get:
+      operationId: getApplicationAgents
+      summary: 查看智能体配置
+      description: |
+        查看应用的 Data Agent 智能体配置情况。
+        
+        **流程：**
+        1. 查询应用的 Data Agent 智能体 IDs
+        2. 查询 Data Agent 智能体详情
+      tags:
+        - Application
+      parameters:
+        - name: app_id
+          in: query
+          description: 应用 ID（key）
+          required: true
+          schema:
+            type: string
+            maxLength: 32
+      responses:
+        '200':
+          description: 获取智能体配置成功
+          content:
+            application/json:
+              schema:
+                $ref: './hub.schemas.yaml#/components/schemas/AgentList'
+        "400":
+          $ref: './hub.schemas.yaml#/components/errors/ParameterError'
+        "404":
+          $ref: './hub.schemas.yaml#/components/errors/NotFoundError'
+        "500":
+          $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
+
+  # ============ 5、卸载应用 ============
   /applications/{key}:
     delete:
       operationId: uninstallApplication
       summary: 卸载应用
+      description: |
+        卸载指定的应用。
+        
+        **流程：**
+        1. 调用卸载应用接口
+        2. 删除数据库中应用记录
+      tags:
+        - Application
       parameters:
         - in: path
           name: key
@@ -49,43 +218,13 @@ paths:
           required: true
           schema:
             type: string
+            maxLength: 32
       responses:
         '204':
           description: 卸载应用成功
         "400":
           $ref: './hub.schemas.yaml#/components/errors/ParameterError'
-        "500":
-          $ref: './hub.schemas.yaml#/components/errors/InternalServerError'
-  
-  /applications/{key}/config/{item}:
-    get:
-      operationId: getApplicationConfig
-      summary: 获取应用配置
-      parameters:
-        - name: key
-          in: path
-          description: 应用唯一标识
-          required: true
-          schema:
-            type: string
-        - name: item
-          in: path
-          description: 配置项名称
-          required: true
-          schema:
-            type: string
-            enum: [basic, ontologies, agents]
-      responses:
-        '200':
-          description: 返回应用配置的详细信息
-          content:
-            application/json:
-              schema:
-                oneOf:
-                  - $ref: './hub.schemas.yaml#/components/schemas/Application'
-                  - $ref: './hub.schemas.yaml#/components/schemas/OntologyConfigList'
-                  - $ref: './hub.schemas.yaml#/components/schemas/AgentConfigList'
-        "400":
-          $ref: './hub.schemas.yaml#/components/errors/ParameterError'
+        "404":
+          $ref: './hub.schemas.yaml#/components/errors/NotFoundError'
         "500":
           $ref: './hub.schemas.yaml#/components/errors/InternalServerError'

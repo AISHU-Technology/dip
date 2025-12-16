@@ -1,7 +1,102 @@
 components:
   schemas:
+    # ============ 应用信息 Schema ============
     Application:
-      summary: 单个应用信息
+      summary: 应用信息
+      description: 对应数据库表 t_application
+      type: object
+      properties:
+        key:
+          type: string
+          title: 应用唯一标识
+          description: 应用包的唯一标识符
+          maxLength: 32
+        name:
+          type: string
+          title: 应用名称
+          maxLength: 128
+        description:
+          type: string
+          title: 应用描述
+          maxLength: 800
+        icon:
+          type: string
+          title: 应用图标
+          description: Base64 编码的图标数据
+        category:
+          type: string
+          title: 应用所属分组
+          maxLength: 128
+        version:
+          type: string
+          title: 应用版本号
+          description: 必须符合语义版本号规范
+          maxLength: 128
+        release_config:
+          type: array
+          title: 应用安装配置
+          description: 记录应用安装了哪些 helm release
+          items:
+            type: string
+          example: ["release1", "release2"]
+        ontology_ids:
+          type: array
+          title: 业务知识网络配置
+          description: 多个业务知识网络 ID
+          items:
+            type: integer
+          example: [1, 2]
+        agent_ids:
+          type: array
+          title: 智能体配置
+          description: 多个智能体 ID
+          items:
+            type: integer
+          example: [1, 2]
+        is_config:
+          type: boolean
+          title: 是否完成配置
+          description: 是否完成业务知识网络以及智能体配置
+          default: false
+        updated_by:
+          type: string
+          title: 更新者用户 ID
+          maxLength: 36
+        updated_at:
+          type: string
+          format: date-time
+          title: 更新时间
+      required:
+        - key
+        - name
+        - release_config
+        - is_config
+        - updated_by
+        - updated_at
+      example:
+        key: 'A9F3D12C7B8E90F4A6C1E2B7D8F0A3C5'
+        name: '智能故障分析'
+        description: 'DIP for ITOps 运维大脑应用'
+        version: '1.0.0'
+        icon: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        category: 'DIP for ITOps'
+        release_config: ['app-release-1']
+        ontology_ids: [1, 2]
+        agent_ids: [1]
+        is_config: true
+        updated_by: 'user-uuid-1234'
+        updated_at: '2025-12-13T12:00:00Z'
+
+    ApplicationList:
+      summary: 应用列表
+      type: array
+      items:
+        $ref: '#/components/schemas/Application'
+
+    # ============ 应用基础信息 Schema ============
+    ApplicationBasicInfo:
+      summary: 应用基础信息
+      description: 应用的基本信息，包括名称、描述、版本、是否配置视图
       type: object
       properties:
         key:
@@ -15,80 +110,100 @@ components:
           title: 应用描述
         version:
           type: string
-          title: 应用版本
+          title: 应用版本号
         icon:
           type: string
-          title: 应用图标，Base64编码
+          title: 应用图标
         category:
           type: string
-          title: 应用所属分类
+          title: 应用所属分组
+        is_config:
+          type: boolean
+          title: 是否完成配置
         updated_by:
           type: string
-          title: 更新者
+          title: 更新者用户 ID
         updated_at:
           type: string
           format: date-time
           title: 更新时间
-      example:
-        key: 'A9F3D12C7B8E90F4A6C1E2B7D8F0A3C5'
-        name: '智能故障分析'
-        description: 'DIP for ITOps 运维大脑应用'
-        version: '1.0.0'
-        icon: 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
-        category: 'DIP for ITOps'
-        updated_by: 'Zak'
-        updated_at: '2025-12-13T12:00:00Z'
+      required:
+        - key
+        - name
+        - is_config
+        - updated_by
+        - updated_at
 
-    ApplicationList:
-      summary: 应用列表
-      type: array
-      items:
-        $ref: '#/components/schemas/Application'
-
-    OntologyConfigList:
-      summary: 本体模型配置信息
+    # ============ 业务知识网络配置 Schema ============
+    OntologyInfo:
+      summary: 业务知识网络信息
       type: object
       properties:
-        item:
+        id:
+          type: integer
+          title: 业务知识网络 ID
+        name:
           type: string
-          enum: [ontologies]
-        data:
-          type: array
-          items:
-            type: object
-            properties:
-              id:
-                type: string
-                title: 本体唯一标识
-              name:
-                type: string
-                title: 本体名称
-              description:
-                type: string
-                title: 本体描述
+          title: 业务知识网络名称
+        description:
+          type: string
+          title: 业务知识网络描述
+      required:
+        - id
 
-    AgentConfigList:
-      summary: 智能体配置信息
+    OntologyList:
+      summary: 业务知识网络列表
       type: object
       properties:
-        item:
-          type: string
-          enum: [agents]
-        data:
+        ontologies:
           type: array
           items:
-            type: object
-            properties:
-              id:
-                type: string
-                title: 智能体 ID
-              name:
-                type: string
-                title: 智能体名称
-              description:
-                type: string
-                title: 智能体描述
+            $ref: '#/components/schemas/OntologyInfo'
 
+    # ============ 智能体配置 Schema ============
+    AgentInfo:
+      summary: 智能体信息
+      type: object
+      properties:
+        id:
+          type: integer
+          title: Data Agent 智能体 ID
+        name:
+          type: string
+          title: 智能体名称
+        description:
+          type: string
+          title: 智能体描述
+      required:
+        - id
+
+    AgentList:
+      summary: 智能体列表
+      type: object
+      properties:
+        agents:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentInfo'
+
+    # ============ 应用配置请求 Schema ============
+    ApplicationConfigRequest:
+      summary: 应用配置请求体
+      description: 用于配置应用的业务知识网络和智能体
+      type: object
+      properties:
+        ontology_ids:
+          type: array
+          title: 业务知识网络 ID 列表
+          items:
+            type: integer
+        agent_ids:
+          type: array
+          title: 智能体 ID 列表
+          items:
+            type: integer
+
+    # ============ 错误响应 Schema ============
     ErrorResponse:
       description: 接口错误信息
       type: object
@@ -115,6 +230,20 @@ components:
   errors:
     ParameterError:
       description: 请求参数错误
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFoundError:
+      description: 资源不存在
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    ConflictError:
+      description: 资源冲突（如版本号冲突）
       content:
         application/json:
           schema:
