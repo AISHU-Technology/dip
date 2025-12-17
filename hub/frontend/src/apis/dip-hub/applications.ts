@@ -1,130 +1,72 @@
-import { post, get, del } from '@/utils/http'
-import type { ListResponse, PageParams } from '../types'
+import { del, get, post, put } from '@/utils/http'
 import type {
-  Application,
+  ApplicationInfo,
+  ApplicationBasicInfo,
+  AgentList,
+  ApplicationConfigRequest,
+  OntologyList,
   PinnedMicroAppsResponse,
   PinMicroAppParams,
 } from './index.d'
 
 /**
  * 安装应用
- * @param appId 应用ID
+ * OpenAPI: POST /applications (application/octet-stream, binary)
  * @returns 应用信息
  */
-// 文件上传
-export const postApplications = (file: FormData): Promise<void> => {
+export const postApplications = (
+  file: Blob | ArrayBuffer
+): Promise<ApplicationInfo> => {
   return post(`/api/dip-hub/v1/applications`, {
     body: file,
-    headers: { 'Content-Type': 'multipart/form-data' },
+    headers: { 'Content-Type': 'application/octet-stream' },
   })
 }
 
 /**
  * 获取应用列表
- * @param params 分页参数
  * @returns 应用列表
  */
-export const getApplications = (
-  params: PageParams = {}
-): Promise<ListResponse<Application>> => {
-  // return get(`/api/dip-hub/v1/applications`, { params })
-  return Promise.resolve({
-    entries: [
-      {
-        id: 1,
-        key: 'micro-app-two',
-        name: 'micro-app-two',
-        icon: '',
-        version: '1.0.0',
-        category: 'micro-app',
-        config: {
-          headless: false,
-        },
-        updated_by: 'admin',
-        updated_at: '2021-01-01 12:00:00',
-      },
-      {
-        id: 1,
-        key: 'micro-app-two',
-        name: 'micro-app-two',
-        icon: '',
-        version: '1.0.0',
-        category: 'micro-app',
-        config: {
-          headless: false,
-        },
-        updated_by: 'admin',
-        updated_at: '2021-01-01 12:00:00',
-      },
-      {
-        id: 1,
-        key: 'micro-app-two',
-        name: 'micro-app-two',
-        icon: '',
-        version: '1.0.0',
-        category: 'micro-app',
-        config: {
-          headless: false,
-        },
-        updated_by: 'admin',
-        updated_at: '2021-01-01 12:00:00',
-      },
-      {
-        id: 1,
-        key: 'micro-app-two',
-        name: 'micro-app-two',
-        icon: '',
-        version: '1.0.0',
-        category: 'micro-app',
-        config: {
-          headless: false,
-        },
-        updated_by: 'admin',
-        updated_at: '2021-01-01 12:00:00',
-      },
-      {
-        id: 1,
-        key: 'micro-app-two',
-        name: 'micro-app-two',
-        icon: '',
-        version: '1.0.0',
-        category: 'micro-app',
-        config: {
-          headless: false,
-        },
-        updated_by: 'admin',
-        updated_at: '2021-01-01 12:00:00',
-      },
-      {
-        id: 1,
-        key: 'micro-app-two',
-        name: 'micro-app-two',
-        icon: '',
-        version: '1.0.0',
-        category: 'micro-app',
-        config: {
-          headless: false,
-        },
-        updated_by: 'admin',
-        updated_at: '2021-01-01 12:00:00',
-      },
-    ],
-    total: 6,
-  })
-}
+export const getApplications = (): Promise<ApplicationInfo[]> =>
+  get(`/api/dip-hub/v1/applications`)
 
 /**
- * 查看应用配置
- * @param key 应用唯一标识
- * @param item 配置项
- * @returns 应用配置
+ * 配置应用（业务知识网络 & 智能体）
+ * OpenAPI: PUT /applications/config?app_id=xxx
  */
-export const getApplicationsConfig = (
-  key: string,
-  item: string
-): Promise<any> => {
-  return get(`/api/dip-hub/v1/applications/${key}/config/${item}`)
-}
+export const putApplicationsConfig = (
+  appId: string,
+  body: ApplicationConfigRequest
+): Promise<ApplicationInfo> =>
+  put(`/api/dip-hub/v1/applications/config`, {
+    params: { app_id: appId },
+    body,
+  })
+
+/**
+ * 查看应用基础信息
+ * OpenAPI: GET /applications/basic-info?app_id=xxx
+ */
+export const getApplicationsBasicInfo = (
+  appId: string
+): Promise<ApplicationBasicInfo> =>
+  get(`/api/dip-hub/v1/applications/basic-info`, { params: { app_id: appId } })
+
+/**
+ * 查看业务知识网络配置
+ * OpenAPI: GET /applications/ontologies?app_id=xxx
+ */
+export const getApplicationsOntologies = (
+  appId: string
+): Promise<OntologyList> =>
+  get(`/api/dip-hub/v1/applications/ontologies`, { params: { app_id: appId } })
+
+/**
+ * 查看智能体配置
+ * OpenAPI: GET /applications/agents?app_id=xxx
+ */
+export const getApplicationsAgents = (appId: string): Promise<AgentList> =>
+  get(`/api/dip-hub/v1/applications/agents`, { params: { app_id: appId } })
 
 /**
  * 卸载应用

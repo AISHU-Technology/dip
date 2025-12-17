@@ -19,6 +19,10 @@ export default defineConfig({
           '^/micro-app-proxy': '',
         },
       },
+      '/api/dip-hub': {
+        target: 'http://127.0.0.1:8082',
+        changeOrigin: true,
+      },
     },
   },
   plugins: [pluginReact(), pluginLess(), pluginSvgr()],

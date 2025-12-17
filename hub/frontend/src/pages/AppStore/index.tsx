@@ -5,13 +5,13 @@ import AppList from '@/components/AppList'
 import Empty from '@/components/Empty'
 import { ModeEnum } from '@/components/AppList/types'
 import { AppStoreActionEnum } from './types'
-import { getApplications, type Application } from '@/apis/dip-hub'
+import { getApplications, type ApplicationInfo } from '@/apis/dip-hub'
 import SearchInput from '@/components/SearchInput'
 import { ReloadOutlined } from '@ant-design/icons'
 import IconFont from '@/components/IconFont'
 
 const AppStore = () => {
-  const [apps, setApps] = useState<Application[]>([])
+  const [apps, setApps] = useState<ApplicationInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState('')
@@ -23,13 +23,13 @@ const AppStore = () => {
       setLoading(true)
       setError(null)
 
-      const response = await getApplications({
-        keyword,
-        offset: 1,
-        limit: 1000,
-      })
-
-      setApps(response.entries)
+      const apps = await getApplications()
+      const filtered = keyword
+        ? apps.filter((a) =>
+            a.name?.toLowerCase().includes(keyword.toLowerCase())
+          )
+        : apps
+      setApps(filtered)
     } catch (err: any) {
       if (err?.name === 'AbortError') return
       if (err?.description) {
@@ -53,7 +53,7 @@ const AppStore = () => {
 
   /** 处理卡片菜单操作 */
   const handleMenuClick = useCallback(
-    async (action: string, _app: Application) => {
+    async (action: string, _app: ApplicationInfo) => {
       try {
         switch (action) {
           case AppStoreActionEnum.Install:

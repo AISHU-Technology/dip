@@ -1,6 +1,6 @@
 import type { BreadcrumbItem } from '@/utils/micro-app/globalState'
 import type { ReactNode } from 'react'
-import HomeIcon from '@/assets/images/home.svg?react'
+import HomeIcon from '@/assets/images/header/home.svg?react'
 import { Button } from 'antd'
 
 interface BreadcrumbProps {

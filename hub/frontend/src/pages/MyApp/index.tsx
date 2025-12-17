@@ -6,12 +6,12 @@ import Empty from '@/components/Empty'
 import { ModeEnum } from '@/components/AppList/types'
 import { MyAppActionEnum } from './types'
 import SearchInput from '@/components/SearchInput'
-import { getApplications, type Application } from '@/apis/dip-hub'
+import { getApplications, type ApplicationInfo } from '@/apis/dip-hub'
 import { ReloadOutlined } from '@ant-design/icons'
 import { usePreferenceStore } from '@/stores'
 
 const MyApp = () => {
-  const [apps, setApps] = useState<Application[]>([])
+  const [apps, setApps] = useState<ApplicationInfo[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [searchValue, setSearchValue] = useState('')
@@ -23,13 +23,13 @@ const MyApp = () => {
       setLoading(true)
       setError(null)
 
-      const response = await getApplications({
-        keyword,
-        offset: 1,
-        limit: 1000,
-      })
-
-      setApps(response.entries || [])
+      const apps = await getApplications()
+      const filtered = keyword
+        ? apps.filter((a) =>
+            a.name?.toLowerCase().includes(keyword.toLowerCase())
+          )
+        : apps
+      setApps(filtered)
     } catch (err: any) {
       if (err?.name === 'AbortError') return
       if (err?.description) {
@@ -53,7 +53,7 @@ const MyApp = () => {
 
   /** 处理卡片菜单操作 */
   const handleMenuClick = useCallback(
-    async (action: string, _app: Application) => {
+    async (action: string, _app: ApplicationInfo) => {
       try {
         switch (action) {
           case MyAppActionEnum.Fix:
