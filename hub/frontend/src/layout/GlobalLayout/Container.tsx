@@ -2,7 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useMatches } from 'react-router-dom'
 import { Layout } from 'antd'
-import Sidebar from '../../components/Sidebar'
+import Sider from '../../components/Sider'
 import MicroAppHeader from '../../components/MicroAppHeader'
 import { useMicroAppStore } from '@/stores/microAppStore'
 
@@ -55,7 +55,7 @@ const Container = ({ children }: ContainerProps) => {
       {hasHeader && <MicroAppHeader />}
       <Layout>
         {hasSider && (
-          <Sidebar
+          <Sider
             collapsed={collapsed}
             onCollapse={setCollapsed}
             topOffset={hasHeader ? headerHeight : 0}

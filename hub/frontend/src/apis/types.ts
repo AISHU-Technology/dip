@@ -1,21 +1,6 @@
-/**
- * 分页参数
- */
-export interface PageParams {
-  /** 页码 */
-  offset?: number
-  /** 分页大小 */
-  limit?: number
-  /** 搜索关键词 */
-  keyword?: string
-}
-
-/**
- * 列表响应
- */
-export interface ListResponse<T> {
-  /** 数据列表 */
-  entries: T[]
-  /** 总数 */
-  total: number
-}
+/** 系统内置普通用户ID */
+export const SYSTEM_FIXED_NORMAL_USER_ID =
+  '49c9f0a6-6f3b-4f4f-9f3b-1c6a7d9d3c12'
+/** 系统内置应用管理员ID */
+export const SYSTEM_FIXED_APP_ADMIN_USER_ID =
+  '1b4f9c46-9c3c-4c36-8e3e-7df3e6c2f7ad'

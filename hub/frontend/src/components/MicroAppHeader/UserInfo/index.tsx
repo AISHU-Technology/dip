@@ -1,6 +1,6 @@
 import { Dropdown, Avatar } from 'antd'
 import type { MenuProps } from 'antd'
-import AvatarIcon from '@/assets/images/avatar.svg?react'
+import AvatarIcon from '@/assets/images/sider/avatar.svg?react'
 import { DownOutlined } from '@ant-design/icons'
 import Cookies from 'js-cookie'
 

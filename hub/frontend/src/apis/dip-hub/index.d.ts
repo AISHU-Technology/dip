@@ -1,7 +1,5 @@
-/** 应用对象 */
-export interface Application {
-  /** 应用主键 ID */
-  id: number
+/** 应用基础信息 */
+export interface ApplicationBasicInfo {
   /** 应用包唯一标识 */
   key: string
   /** 应用名称 */
@@ -10,32 +8,70 @@ export interface Application {
   description?: string
   /** 应用图标（Base64编码字符串） */
   icon?: string
-  /** 当前版本号 */
-  version?: string
-  /** 应用所属分类 */
+  /** 应用所属分组 */
   category?: string
-  /** 应用配置（JSON格式） */
-  config?: {
-    /** 是否为无头模式（不显示 Header） */
-    headless?: boolean
-    [key: string]: any
-  }
+  /** 应用版本号 */
+  version?: string
+  /** 是否完成配置 */
+  is_config: boolean
   /** 更新者用户 ID */
-  updated_by?: string
-  /** 更新时间 */
-  updated_at?: string
+  updated_by: string
+  /** 更新时间（ISO 8601 date-time） */
+  updated_at: string
+}
+
+/** 应用信息 */
+export interface ApplicationInfo extends ApplicationBasicInfo {
+  /** 应用安装配置：记录应用安装了哪些 helm release */
+  release_config: string[]
+  /** 业务知识网络 ID 列表 */
+  ontology_ids?: number[]
+  /** 智能体 ID 列表 */
+  agent_ids?: number[]
+}
+
+/** 业务知识网络信息 */
+export interface OntologyInfo {
+  id: number
+  name?: string
+  description?: string
+}
+
+/** 业务知识网络列表 */
+export interface OntologyList {
+  ontologies?: OntologyInfo[]
+}
+
+/** 智能体信息 */
+export interface AgentInfo {
+  id: number
+  name?: string
+  description?: string
+}
+
+/** 智能体列表 */
+export interface AgentList {
+  agents?: AgentInfo[]
+}
+
+/** 应用配置请求体 */
+export interface ApplicationConfigRequest {
+  ontology_ids?: number[]
+  agent_ids?: number[]
 }
 
 /** 用户对象 */
-export interface User {
+export interface UserInfo {
   /** 用户ID */
   user_id: string
   /** 用户显示名 */
   display_name: string
+  /** 角色ID列表 */
+  role_ids: string[]
 }
 
 /** 角色对象 */
-export interface Role {
+export interface RoleInfo {
   /** 角色ID */
   role_id: string
   /** 角色名称 */

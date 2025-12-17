@@ -54,13 +54,19 @@ const createHttpRequest = curry(
         ...headers,
       },
       timeout,
-      cancelToken: new CancelToken((c) => {
+      cancelToken: new CancelToken((c: any) => {
         cancel = c
       }),
       transformRequest: [
         (data: any) => {
           if (data) {
-            if (data instanceof FormData || typeof data === 'string')
+            if (
+              data instanceof FormData ||
+              typeof data === 'string' ||
+              data instanceof Blob ||
+              data instanceof ArrayBuffer ||
+              ArrayBuffer.isView(data)
+            )
               return data // 不转换 FormData；不转换字符串
 
             try {
@@ -158,8 +164,4 @@ const cacheableHttpFn = () => {
 
 const cacheableHttp = cacheableHttpFn()
 
-export {
-  createHttpRequest,
-  cacheableHttp,
-  getCommonHttpHeaders,
-}
+export { createHttpRequest, cacheableHttp, getCommonHttpHeaders }

@@ -47,7 +47,7 @@ export function defaultRefreshToken(): Promise<{ accessToken: string }> {
 }
 
 const onTokenExpired = (code?: number) => {
-  window.location.href = '/login'
+  window.location.replace('/login')
 }
 
 export const httpConfig: HttpConfig = {

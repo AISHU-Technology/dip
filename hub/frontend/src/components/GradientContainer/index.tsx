@@ -1,6 +1,6 @@
 import classNames from 'classnames'
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react'
-import bg from '@/assets/images/gradient-container-bg.svg'
+import bg from '@/assets/images/background.png'
 interface GradientContainerProps {
   children: ReactNode
   className?: string

@@ -1,4 +1,4 @@
-import CopilotIcon from '@/assets/images/copilot.svg?react'
+import CopilotIcon from '@/assets/images/header/copilot.svg?react'
 
 interface CopilotButtonProps {
   onClick?: () => void

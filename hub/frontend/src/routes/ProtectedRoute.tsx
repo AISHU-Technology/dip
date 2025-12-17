@@ -1,5 +1,8 @@
 import { Navigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '../stores'
+import { getAccessToken } from '@/utils/http/token-config'
+import { getRouteByPath, isRouteVisibleForRoles } from './routes'
+import { SYSTEM_FIXED_NORMAL_USER_ID } from '@/apis/types'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
@@ -17,12 +20,34 @@ interface ProtectedRouteProps {
  * } />
  */
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, userInfo } = useAuthStore()
   const location = useLocation()
 
-  // if (!isAuthenticated) {
-  //   // 未登录，重定向到登录页，并保存当前路径以便登录后跳转
+  // // 1) token 校验：无 token 或未登录 -> 登录页
+  // const token = getAccessToken()
+  // if (!token || !isAuthenticated) {
   //   return <Navigate to="/login" state={{ from: location }} replace />
+  // }
+
+  // // 2) 角色校验：无角色 -> 登录失败页
+  // const roleIds = new Set(userInfo?.role_ids ?? [])
+  // if (roleIds.size === 0) {
+  //   return <Navigate to="/login-failed" replace />
+  // }
+
+  // // 3) 权限校验：根据当前路由绑定的 requiredRoleIds 判断
+  // const pathname = location.pathname
+  // // 微应用容器：仅“普通用户”角色可访问
+  // if (pathname.startsWith('/application/')) {
+  //   if (!roleIds.has(SYSTEM_FIXED_NORMAL_USER_ID)) {
+  //     return <Navigate to="/403" replace />
+  //   }
+  //   return <>{children}</>
+  // }
+
+  // const route = getRouteByPath(pathname)
+  // if (route && !isRouteVisibleForRoles(route, roleIds)) {
+  //   return <Navigate to="/403" replace />
   // }
 
   return <>{children}</>
