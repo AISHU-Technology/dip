@@ -26,6 +26,11 @@ export default defineConfig({
     },
   },
   plugins: [pluginReact(), pluginLess(), pluginSvgr()],
+  html: {
+    // 使用 public/dip.svg 作为浏览器标签页图标
+    // 这里路径相对于项目根目录（public/dip.svg）
+    favicon: 'public/dip.svg',
+  },
   source: {
     // 配置 antd 按需加载（antd 6.0 使用 CSS-in-JS，自动按需加载）
     transformImport: [

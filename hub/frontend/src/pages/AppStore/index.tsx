@@ -1,55 +1,31 @@
-import { useState, useEffect, useCallback, memo } from 'react'
+import { useState, useCallback, memo, useEffect } from 'react'
 import { Spin, Button, message } from 'antd'
 import GradientContainer from '@/components/GradientContainer'
 import AppList from '@/components/AppList'
 import Empty from '@/components/Empty'
 import { ModeEnum } from '@/components/AppList/types'
 import { AppStoreActionEnum } from './types'
-import { getApplications, type ApplicationInfo } from '@/apis/dip-hub'
+import { type ApplicationInfo } from '@/apis/dip-hub'
 import SearchInput from '@/components/SearchInput'
 import { ReloadOutlined } from '@ant-design/icons'
 import IconFont from '@/components/IconFont'
+import { useApplicationsService } from '@/hooks/useApplicationsService'
+import AppConfigDrawer from '@/components/AppConfigDrawer'
 
 const AppStore = () => {
-  const [apps, setApps] = useState<ApplicationInfo[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchValue, setSearchValue] = useState('')
+  const { apps, loading, error, searchValue, handleSearch, handleRefresh } =
+    useApplicationsService()
   const [installModalVisible, setInstallModalVisible] = useState(false)
+  const [configModalVisible, setConfigModalVisible] = useState(false)
+  const [selectedApp, setSelectedApp] = useState<ApplicationInfo | null>(null)
+  const [hasLoadedData, setHasLoadedData] = useState(false) // 记录是否已经成功加载过数据（有数据的情况）
 
-  /** 获取应用列表数据 */
-  const fetchAppList = useCallback(async (keyword: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const apps = await getApplications()
-      const filtered = keyword
-        ? apps.filter((a) =>
-            a.name?.toLowerCase().includes(keyword.toLowerCase())
-          )
-        : apps
-      setApps(filtered)
-    } catch (err: any) {
-      if (err?.name === 'AbortError') return
-      if (err?.description) {
-        message.error(err.description)
-      }
-      setError('获取数据时发生错误')
-    } finally {
-      setLoading(false)
+  // 当数据加载完成且有数据时，标记为已加载过数据
+  useEffect(() => {
+    if (!loading && apps.length > 0) {
+      setHasLoadedData(true)
     }
-  }, [])
-
-  /** 刷新数据 */
-  const handleRefresh = useCallback(() => {
-    fetchAppList(searchValue)
-  }, [fetchAppList, searchValue])
-
-  /** 处理搜索 */
-  const handleSearch = useCallback((value: string) => {
-    setSearchValue(value)
-  }, [])
+  }, [loading, apps.length])
 
   /** 处理卡片菜单操作 */
   const handleMenuClick = useCallback(
@@ -67,7 +43,8 @@ const AppStore = () => {
             handleRefresh()
             break
           case AppStoreActionEnum.Config:
-            // TODO: 跳转配置页面
+            setSelectedApp(_app)
+            setConfigModalVisible(true)
             break
           case AppStoreActionEnum.Run:
             // TODO: 运行应用
@@ -85,10 +62,6 @@ const AppStore = () => {
     },
     [handleRefresh]
   )
-
-  useEffect(() => {
-    fetchAppList(searchValue)
-  }, [searchValue])
 
   /** 渲染状态内容（loading/error/empty） */
   const renderStateContent = () => {
@@ -114,7 +87,17 @@ const AppStore = () => {
         <Empty
           desc="暂无可用应用"
           subDesc="您当前没有任何应用的访问权限。这可能是因为管理员尚未为您分配权限，或者应用尚未部署。"
-        />
+        >
+          <Button
+            type="primary"
+            icon={<IconFont type="icon-dip-upload" />}
+            onClick={() => {
+              setInstallModalVisible(true)
+            }}
+          >
+            安装应用
+          </Button>
+        </Empty>
       )
     }
 
@@ -149,23 +132,30 @@ const AppStore = () => {
           <span className="text-base font-bold">应用商店</span>
           <span className="text-sm">管理企业应用市场，安装或卸载应用</span>
         </div>
-        <div className="flex items-center gap-x-2">
-          <SearchInput onSearch={handleSearch} placeholder="搜索应用" />
-          <Button
-            type="text"
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-          />
-          <Button
-            type="primary"
-            icon={<IconFont type="icon-dip-upload" />}
-            onClick={() => setInstallModalVisible(true)}
-          >
-            安装应用
-          </Button>
-        </div>
+        {hasLoadedData && (
+          <div className="flex items-center gap-x-2">
+            <SearchInput onSearch={handleSearch} placeholder="搜索应用" />
+            <Button
+              type="text"
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+            />
+            <Button
+              type="primary"
+              icon={<IconFont type="icon-dip-upload" />}
+              onClick={() => setInstallModalVisible(true)}
+            >
+              安装应用
+            </Button>
+          </div>
+        )}
       </div>
       {renderContent()}
+      <AppConfigDrawer
+        appData={selectedApp ?? undefined}
+        open={configModalVisible}
+        onClose={() => setConfigModalVisible(false)}
+      />
     </GradientContainer>
   )
 }

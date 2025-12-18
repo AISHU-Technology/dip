@@ -22,6 +22,7 @@ interface ProtectedRouteProps {
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, userInfo } = useAuthStore()
   const location = useLocation()
+  console.log('userInfo', userInfo)
 
   // // 1) token 校验：无 token 或未登录 -> 登录页
   // const token = getAccessToken()
