@@ -75,6 +75,42 @@ paths:
   /api/authorization/v1/resource-type-operation:
     $ref: './auth/auth.paths.yaml#/paths/resource-type-operation'
 
+  # ============ MDL Data Model API ============
+  /mdl-data-model/v1/metric-model-groups:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-model-groups'
+  /mdl-data-model/v1/metric-model-groups/{group_id}:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-model-groups~1{group_id}'
+  /mdl-data-model/v1/metric-model-groups/{group_name}/metric-models/{model_name}:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-model-groups~1{group_name}~1metric-models~1{model_name}'
+  /mdl-data-model/v1/metric-models:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-models'
+  /mdl-data-model/v1/metric-models/{id}:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-models~1{id}'
+  /mdl-data-model/v1/metric-models/{id}/attributes:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-models~1{id}~1attributes'
+  /mdl-data-model/v1/metric-models/{id}/fields:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-models~1{id}~1fields'
+  /mdl-data-model/v1/metric-tasks/{id}:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-tasks~1{id}'
+  /mdl-data-model/v1/metric-tasks/{id}/attr:
+    $ref: './mdl-data-model/mdl-data-model.paths.yaml#/paths/~1mdl-data-model~1v1~1metric-tasks~1{id}~1attr'
+
+  # ============ MDL Uniquery API ============
+  /api/mdl-uniquery/v1/health:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1health'
+  /api/mdl-uniquery/v1/metric-model:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1metric-model'
+  /api/mdl-uniquery/v1/metric-models/{ids}:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1metric-models~1{ids}'
+  /api/mdl-uniquery/v1/metric-model-groups/{group_name}/metric-models:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1metric-model-groups~1{group_name}~1metric-models'
+  /api/mdl-uniquery/v1/metric-models/{id}/fields:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1metric-models~1{id}~1fields'
+  /api/mdl-uniquery/v1/metric-models/{id}/field_values/{field_name}:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1metric-models~1{id}~1field_values~1{field_name}'
+  /api/mdl-uniquery/v1/metric-models/{id}/labels:
+    $ref: './mdl-uniquery/mdl-uniquery.paths.yaml#/paths/~1api~1mdl-uniquery~1v1~1metric-models~1{id}~1labels'
+
 
 components:
   schemas:
