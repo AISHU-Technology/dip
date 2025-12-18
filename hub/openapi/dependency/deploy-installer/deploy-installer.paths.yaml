@@ -2,6 +2,8 @@ paths:
   agents:
     image:
       put:
+        tags:
+          - 安装部署
         summary: 上传镜像
         description: 上传镜像文件，格式仅支持 oci-archive，也就是符合 oci 布局的 tar 文件
         requestBody:
@@ -42,6 +44,8 @@ paths:
                   $ref: './deploy-installer.schemas.yaml#/components/schemas/InternalError'
     chart:
       put:
+        tags:
+          - 安装部署
         summary: 上传Chart
         description: 上传Chart文件，仅支持标准helm chart (v2) 文件
         requestBody:
@@ -73,6 +77,8 @@ paths:
                   $ref: './deploy-installer.schemas.yaml#/components/schemas/InternalError'
     releases:
       post:
+        tags:
+          - 安装部署
         summary: 应用实例（安装/更新）
         description: |-
           chart要求能够使用此结构配置镜像仓库地址
@@ -80,7 +86,6 @@ paths:
           image:
             registry: docker.io
           ```
-        tags: []
         parameters:
           - name: release-name
             in: path
@@ -149,9 +154,10 @@ paths:
                 schema:
                   $ref: './deploy-installer.schemas.yaml#/components/schemas/InternalError'
       delete:
+        tags:
+          - 安装部署
         summary: 删除实例
         description: ''
-        tags: []
         parameters:
           - name: release-name
             in: path
