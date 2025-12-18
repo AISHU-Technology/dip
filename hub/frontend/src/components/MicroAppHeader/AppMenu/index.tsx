@@ -1,36 +1,24 @@
-import { useState, useRef, useCallback, useMemo } from 'react'
-import { Dropdown, message } from 'antd'
+import { useMemo } from 'react'
+import { Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
-import { getApplications, type Application } from '@/apis/dip-hub'
+import { useApplicationsService } from '@/hooks/useApplicationsService'
 
 /**
  * 导航菜单图标按钮组件
  */
 export const AppMenu = () => {
-  const [appList, setAppList] = useState<Array<Application>>([])
-  const fetchingRef = useRef(false) // 使用 ref 跟踪请求状态，避免状态更新延迟导致的重复请求
+  // 使用手动加载模式，点击时才触发
+  const { apps, loading, fetchAppList } = useApplicationsService({
+    autoLoad: false,
+  })
 
-  // 点击时再请求应用列表
-  const fetchAppList = useCallback(async () => {
-    if (fetchingRef.current) return
-    fetchingRef.current = true
-    try {
-      // await getApplications({})
-      // // setAppList(list)
-      // setAppList(mockAppList)
-    } catch (error: any) {
-      // 开发环境使用 mock 数据
-      console.warn('Failed to fetch app list, using mock data:', error)
-      if (error?.description) {
-        message.error(error.description)
-      }
-    } finally {
-      fetchingRef.current = false
-    }
-  }, [])
+  // 处理点击按钮触发加载
+  const handleButtonClick = () => {
+    fetchAppList()
+  }
 
   const handleMenuClick: MenuProps['onClick'] = ({ key }) => {
-    const app = appList.find((item) => item.key === key)
+    const app = apps.find((item) => item.key === key)
     if (app && app.key) {
       // 以新标签页形式打开应用
       window.open(`/application/${app.key}`, '_blank')
@@ -39,22 +27,24 @@ export const AppMenu = () => {
 
   const menuItems: MenuProps['items'] = useMemo(
     () =>
-      Array.isArray(appList)
-        ? appList.map((app) => ({
+      Array.isArray(apps)
+        ? apps.map((app) => ({
             key: app.key,
             label: (
               <div className="flex items-center gap-2">
-                <img
-                  src={app.icon}
-                  alt={app.name}
-                  className="w-[4px] h-[4px]"
-                />
+                {app.icon && (
+                  <img
+                    src={`data:image/png;base64,${app.icon}`}
+                    alt={app.name}
+                    className="w-[4px] h-[4px]"
+                  />
+                )}
                 <span>{app.name}</span>
               </div>
             ),
           }))
         : [],
-    [appList]
+    [apps]
   )
 
   return (
@@ -65,8 +55,8 @@ export const AppMenu = () => {
     >
       <button
         className="flex items-center justify-center w-6 h-6 cursor-pointer bg-transparent border-0 p-0 text-[--dip-text-color] transition-opacity duration-200 hover:text-[--dip-link-color] disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={fetchingRef.current}
-        onClick={fetchAppList}
+        disabled={loading}
+        onClick={handleButtonClick}
       >
         <svg
           width="24"

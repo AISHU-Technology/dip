@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, memo } from 'react'
+import { useCallback, memo, useState, useEffect } from 'react'
 import { Spin, Button, message } from 'antd'
 import GradientContainer from '@/components/GradientContainer'
 import AppList from '@/components/AppList'
@@ -6,50 +6,23 @@ import Empty from '@/components/Empty'
 import { ModeEnum } from '@/components/AppList/types'
 import { MyAppActionEnum } from './types'
 import SearchInput from '@/components/SearchInput'
-import { getApplications, type ApplicationInfo } from '@/apis/dip-hub'
+import { type ApplicationInfo } from '@/apis/dip-hub'
 import { ReloadOutlined } from '@ant-design/icons'
 import { usePreferenceStore } from '@/stores'
+import { useApplicationsService } from '@/hooks/useApplicationsService'
 
 const MyApp = () => {
-  const [apps, setApps] = useState<ApplicationInfo[]>([])
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [searchValue, setSearchValue] = useState('')
+  const { apps, loading, error, searchValue, handleSearch, handleRefresh } =
+    useApplicationsService()
   const { togglePin } = usePreferenceStore()
+  const [hasLoadedData, setHasLoadedData] = useState(false) // 记录是否已经成功加载过数据（有数据的情况）
 
-  /** 获取应用列表数据 */
-  const fetchAppList = useCallback(async (keyword: string) => {
-    try {
-      setLoading(true)
-      setError(null)
-
-      const apps = await getApplications()
-      const filtered = keyword
-        ? apps.filter((a) =>
-            a.name?.toLowerCase().includes(keyword.toLowerCase())
-          )
-        : apps
-      setApps(filtered)
-    } catch (err: any) {
-      if (err?.name === 'AbortError') return
-      if (err?.description) {
-        message.error(err.description)
-      }
-      setError('获取数据时发生错误')
-    } finally {
-      setLoading(false)
+  // 当数据加载完成且有数据时，标记为已加载过数据
+  useEffect(() => {
+    if (!loading && apps.length > 0) {
+      setHasLoadedData(true)
     }
-  }, [])
-
-  /** 刷新数据 */
-  const handleRefresh = useCallback(() => {
-    fetchAppList(searchValue)
-  }, [fetchAppList, searchValue])
-
-  /** 处理搜索 */
-  const handleSearch = useCallback((value: string) => {
-    setSearchValue(value)
-  }, [])
+  }, [loading, apps.length])
 
   /** 处理卡片菜单操作 */
   const handleMenuClick = useCallback(
@@ -77,13 +50,8 @@ const MyApp = () => {
         message.error('操作失败')
       }
     },
-    [handleRefresh]
+    [handleRefresh, togglePin]
   )
-
-  // 初始化和搜索时加载数据
-  useEffect(() => {
-    fetchAppList(searchValue)
-  }, [searchValue])
 
   /** 渲染状态内容（loading/error/empty） */
   const renderStateContent = () => {
@@ -146,14 +114,16 @@ const MyApp = () => {
             查找具备专业能力的应用，帮你解决业务上的复杂问题
           </span>
         </div>
-        <div className="flex items-center gap-x-2">
-          <SearchInput onSearch={handleSearch} placeholder="搜索应用" />
-          <Button
-            type="text"
-            icon={<ReloadOutlined />}
-            onClick={handleRefresh}
-          />
-        </div>
+        {hasLoadedData && (
+          <div className="flex items-center gap-x-2">
+            <SearchInput onSearch={handleSearch} placeholder="搜索应用" />
+            <Button
+              type="text"
+              icon={<ReloadOutlined />}
+              onClick={handleRefresh}
+            />
+          </div>
+        )}
       </div>
       {renderContent()}
     </GradientContainer>
