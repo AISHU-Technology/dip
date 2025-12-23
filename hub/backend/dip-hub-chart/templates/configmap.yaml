@@ -1,0 +1,87 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.name }}-cm
+  namespace: {{ .Values.namespace }}
+data:
+  {{- with .Values }}
+  # 应用配置 - 根据 settings.py 生成
+  DIP_HUB_APP_NAME: "DIP Hub"
+  DIP_HUB_APP_VERSION: "{{ .service.version }}"
+  DIP_HUB_DEBUG: "false"
+  
+  # 服务器配置
+  DIP_HUB_HOST: "0.0.0.0"
+  DIP_HUB_PORT: "{{ .ports.containerPort }}"
+  DIP_HUB_WORKERS: "1"
+  
+  # API 配置
+  DIP_HUB_API_PREFIX: "/api/dip-hub/v1"
+  
+  # 日志配置
+  DIP_HUB_LOG_LEVEL: "{{ .service.telemetry.log.level }}"
+  DIP_HUB_LOG_FORMAT: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  
+  # 健康检查配置
+  DIP_HUB_HEALTH_CHECK_TIMEOUT: "5"
+  
+  # 临时文件配置
+  DIP_HUB_TEMP_DIR: "/tmp/dip-hub"
+  
+  # 数据库配置
+  DIP_HUB_DB_HOST: "{{ .depServices.rds.host }}"
+  DIP_HUB_DB_PORT: "{{ .depServices.rds.port }}"
+  DIP_HUB_DB_NAME: {{ .depServices.rds.database | quote }}
+  DIP_HUB_DB_USER: {{ .depServices.rds.user | quote }}
+  DIP_HUB_DB_PASSWORD: {{ .depServices.rds.password | quote }}
+  
+  # Proton 部署服务配置
+  DIP_HUB_PROTON_URL: {{ .depServices.proton.url | quote }}
+  DIP_HUB_PROTON_TIMEOUT: "{{ .depServices.proton.timeout }}"
+  
+  # Ontology Manager 服务配置
+  DIP_HUB_ONTOLOGY_MANAGER_URL: {{ .depServices.ontology-manager.url | quote }}
+  DIP_HUB_ONTOLOGY_MANAGER_TIMEOUT: "{{ .depServices.ontology-manager.timeout }}"
+  
+  # Agent Factory 服务配置
+  DIP_HUB_AGENT_FACTORY_URL: {{ .depServices.agent-factory.url | quote }}
+  DIP_HUB_AGENT_FACTORY_TIMEOUT: "{{ .depServices.agent-factory.timeout }}"
+  
+  # Mock 模式配置
+  DIP_HUB_USE_MOCK_SERVICES: "false"
+  
+  # 其他依赖服务配置（如果需要）
+  LOG_PATH: {{ .depServices.logPath | quote }}
+  REDIS_HOST: {{ .depServices.redis.host | quote }}
+  REDIS_PASSWORD: {{ .depServices.redis.password | quote }}
+  REDIS_DB: {{ .depServices.redis.database | quote }}
+  REDIS_MIN_IDLE_CONNS: {{ .depServices.redis.minIdleConns | quote }}
+  HYDRA_HOST: "http://{{ .depServices.hydra.administrativeHost}}:{{ .depServices.hydra.administrativePort}}"
+  HYDRA_PUBLIC_HOST: "http://{{ .depServices.hydra.publicHost}}:{{ .depServices.hydra.publicPort}}"
+  USER_MANAGE_HOST: "http://{{index .depServices "user-management" "privateHost"}}:{{index .depServices "user-management" "privatePort"}}"
+  ANYROBOT_TRACE_URL: {{ .depServices.anyRobotTraceUrl | quote }}
+  CONFIGURATION_CENTER_HOST: "http://{{index .depServices "configuration-center" "host"}}:{{index .depServices "configuration-center" "port"}}"
+  DATA_CATALOG_HOST: "http://{{index .depServices "data-catalog" "host"}}:{{index .depServices "data-catalog" "port"}}"
+  BUSINESS_GROOMING_HOST: "http://{{index .depServices "business-grooming" "host"}}:{{index .depServices "business-grooming" "port"}}"
+  DATA_SUBJECT_HOST: "http://{{index .depServices "data-subject" "host"}}:{{index .depServices "data-subject" "port"}}"
+  VIRTUALIZATION_ENGINE_HOST: "{{index .depServices "virtualizationEngine" "protocol"}}://{{index .depServices "virtualizationEngine" "host"}}:{{index .depServices "virtualizationEngine" "port"}}"
+  DATA_VIEW_HOST: "http://{{index .depServices "data-view" "host"}}:{{index .depServices "data-view" "port"}}"
+  SCENE_ANALYSIS_HOST: "http://{{index .depServices "scene-analysis" "host"}}:{{index .depServices "scene-analysis" "port"}}"
+  AUTH_SERVICE_HOST: "http://{{index .depServices "auth-service" "host"}}:{{index .depServices "auth-service" "port"}}"
+  KAFKA_MQ_HOST: "{{index .depServices "mq" "kafka" "host"}}:{{index .depServices "mq" "kafka" "port"}}"
+  KAFKA_USERNAME: "{{ .depServices.mq.kafka.username }}"
+  KAFKA_PASSWORD: "{{ .depServices.mq.kafka.password }}"
+  KAFKA_MECHANISM: "{{ .depServices.mq.kafka.mechanism }}"
+  
+  # 遥测配置
+  AUDIT_URL: {{ .service.telemetry.audit.endpoint | quote }}
+  AUDIT_ENABLED: {{ .service.telemetry.audit.enabled | quote }}
+  TRACE_URL: "{{ .service.telemetry.trace.endpoint}}"
+  TRACE_ENABLED: "{{ .service.telemetry.trace.enabled}}"
+  LOG_LEVEL: "{{ .service.telemetry.log.level}}"
+  LOG_URL: "{{ .service.telemetry.log.endpoint}}"
+  LOG_ENABLED: "{{ .service.telemetry.log.enabled}}"
+  SERVER_NAME: "{{ .service.name}}"
+  SERVER_VERSION: "{{ .service.version}}"
+  {{- end }}
+
