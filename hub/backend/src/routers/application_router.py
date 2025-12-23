@@ -11,6 +11,7 @@ from fastapi.responses import Response
 from typing import List
 
 from src.application.application_service import ApplicationService
+from src.infrastructure.context.token_context import get_user_info
 from src.routers.schemas.application import (
     ApplicationResponse,
     ApplicationBasicInfoResponse,
@@ -117,8 +118,9 @@ def create_application_router(application_service: ApplicationService) -> APIRou
                     }
                 )
             
-            # 获取更新者用户 ID（从请求头获取）
-            updated_by = request.headers.get("X-User-Id", "system")
+            # 从上下文获取用户信息（由中间件通过token内省获取）
+            user_info = get_user_info()
+            updated_by = user_info.id if user_info else request.headers.get("X-User-Id", "system")
             # 认证 Token 已由中间件统一提取并存储到 request.state 和 TokenContext
             # 适配器层会从 TokenContext 统一获取，这里可以不再传递
             auth_token = getattr(request.state, "auth_token", None)
@@ -226,8 +228,9 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             ApplicationResponse: 更新后的应用信息
         """
         try:
-            # 获取更新者用户 ID
-            updated_by = request.headers.get("X-User-Id", "system")
+            # 从上下文获取用户信息（由中间件通过token内省获取）
+            user_info = get_user_info()
+            updated_by = user_info.id if user_info else request.headers.get("X-User-Id", "system")
 
             # 应用配置不再从请求体中传入，而是直接基于数据库中已有的配置，
             # 将业务知识网络配置和智能体配置的 is_config 统一设置为 True。
