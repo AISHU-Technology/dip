@@ -77,7 +77,6 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
     )
     async def login(
         request: Request,
-        platform: int = Query(default=1, description="平台类型", ge=1, le=8),
         asredirect: str | None = Query(default=None, description="AnyShare 重定向地址"),
     ):
         """
@@ -115,7 +114,6 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
             session_id, session_info = await login_service.get_or_create_session(
                 existing_session_id,
                 state,
-                platform,
                 asredirect,
             )
             if existing_session_id and session_info.state != state:

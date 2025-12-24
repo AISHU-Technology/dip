@@ -43,12 +43,12 @@ data:
   DIP_HUB_PROTON_TIMEOUT: "{{ .depServices.proton.timeout }}"
   
   # Ontology Manager 服务配置
-  DIP_HUB_ONTOLOGY_MANAGER_URL: {{ .depServices.ontology-manager.url | quote }}
-  DIP_HUB_ONTOLOGY_MANAGER_TIMEOUT: "{{ .depServices.ontology-manager.timeout }}"
+  DIP_HUB_ONTOLOGY_MANAGER_URL: {{ index .depServices "ontology-manager" "url" | quote }}
+  DIP_HUB_ONTOLOGY_MANAGER_TIMEOUT: "{{ index .depServices "ontology-manager" "timeout" }}"
   
   # Agent Factory 服务配置
-  DIP_HUB_AGENT_FACTORY_URL: {{ .depServices.agent-factory.url | quote }}
-  DIP_HUB_AGENT_FACTORY_TIMEOUT: "{{ .depServices.agent-factory.timeout }}"
+  DIP_HUB_AGENT_FACTORY_URL: {{ index .depServices "agent-factory" "url" | quote }}
+  DIP_HUB_AGENT_FACTORY_TIMEOUT: "{{ index .depServices "agent-factory" "timeout" }}"
   
   # Redis 配置
   DIP_HUB_REDIS_HOST: {{ .depServices.redis.host | quote }}
@@ -69,11 +69,11 @@ data:
   DIP_HUB_HYDRA_TIMEOUT: "30"
   
   # User Management 服务配置
-  DIP_HUB_USER_MANAGEMENT_URL: "http://{{ .depServices.user-management.privateHost }}:{{ .depServices.user-management.privatePort }}"
+  DIP_HUB_USER_MANAGEMENT_URL: "http://{{ index .depServices "user-management" "privateHost" }}:{{ index .depServices "user-management" "privatePort" }}"
   DIP_HUB_USER_MANAGEMENT_TIMEOUT: "60"
   
   # Deploy Manager 服务配置
-  DIP_HUB_DEPLOY_MANAGER_URL: "http://{{ .depServices.deploy-management.host }}:{{ .depServices.deploy-management.port }}"
+  DIP_HUB_DEPLOY_MANAGER_URL: "http://{{ index .depServices "deploy-management" "host" }}:{{ index .depServices "deploy-management" "port" }}"
   DIP_HUB_DEPLOY_MANAGER_TIMEOUT: "60"
   
   # Session Cookie 配置（使用 session-chart 的默认值）
@@ -92,14 +92,6 @@ data:
   HYDRA_HOST: "http://{{ .depServices.hydra.administrativeHost}}:{{ .depServices.hydra.administrativePort}}"
   HYDRA_PUBLIC_HOST: "http://{{ .depServices.hydra.publicHost}}:{{ .depServices.hydra.publicPort}}"
   USER_MANAGE_HOST: "http://{{index .depServices "user-management" "privateHost"}}:{{index .depServices "user-management" "privatePort"}}"
-  ANYROBOT_TRACE_URL: {{ .depServices.anyRobotTraceUrl | quote }}
-  CONFIGURATION_CENTER_HOST: "http://{{index .depServices "configuration-center" "host"}}:{{index .depServices "configuration-center" "port"}}"
-  DATA_CATALOG_HOST: "http://{{index .depServices "data-catalog" "host"}}:{{index .depServices "data-catalog" "port"}}"
-  BUSINESS_GROOMING_HOST: "http://{{index .depServices "business-grooming" "host"}}:{{index .depServices "business-grooming" "port"}}"
-  DATA_SUBJECT_HOST: "http://{{index .depServices "data-subject" "host"}}:{{index .depServices "data-subject" "port"}}"
-  VIRTUALIZATION_ENGINE_HOST: "{{index .depServices "virtualizationEngine" "protocol"}}://{{index .depServices "virtualizationEngine" "host"}}:{{index .depServices "virtualizationEngine" "port"}}"
-  DATA_VIEW_HOST: "http://{{index .depServices "data-view" "host"}}:{{index .depServices "data-view" "port"}}"
-  SCENE_ANALYSIS_HOST: "http://{{index .depServices "scene-analysis" "host"}}:{{index .depServices "scene-analysis" "port"}}"
   AUTH_SERVICE_HOST: "http://{{index .depServices "auth-service" "host"}}:{{index .depServices "auth-service" "port"}}"
   KAFKA_MQ_HOST: "{{index .depServices "mq" "kafka" "host"}}:{{index .depServices "mq" "kafka" "port"}}"
   KAFKA_USERNAME: "{{ .depServices.mq.kafka.username }}"

@@ -4,17 +4,17 @@ namespace: anyshare
 # 1 修改标签
 labels:
   deployment:
-    name: dip-hub-deployment
+    name: dip-hub
   pod:
-    app: dip-hub-pod
+    app: dip-hub
   service:
-    app: dip-hub-service
+    app: dip-hub
 
 # 2 修改仓库服务的镜像地址：不同的项目记得修改repository中af后的项目名和tag
 image:
   registry: acr.aishu.cn
-  repository: af/dip-hub
-  tag: "1.0.0-develop"
+  repository: dip-hub
+  tag: "1.0.0"
   pullPolicy: IfNotPresent
 
 #3 修改容器副本数量

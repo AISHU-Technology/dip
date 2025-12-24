@@ -94,7 +94,6 @@ class LoginService:
         self,
         session_id: str | None,
         state: str,
-        platform: int,
         as_redirect: str | None = None,
     ) -> Tuple[str, SessionInfo]:
         """
@@ -103,18 +102,19 @@ class LoginService:
         参数:
             session_id: 现有的 Session ID，如果为 None 则创建新的
             state: 状态字符串
-            platform: 平台类型
             as_redirect: AnyShare 重定向地址
 
         返回:
             tuple[str, SessionInfo]: (Session ID, Session 信息)
         """
+        # 平台类型固定为 1（不区分平台）
+        platform = 1
+        
         if session_id:
             session_info = await self._session_port.get_session(session_id)
             if session_info:
                 # 更新 Session 信息
-                if session_info.platform != platform or session_info.as_redirect != as_redirect:
-                    session_info.platform = platform
+                if session_info.as_redirect != as_redirect:
                     session_info.as_redirect = as_redirect
                     await self._session_port.save_session(session_id, session_info)
                 return session_id, session_info

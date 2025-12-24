@@ -25,6 +25,9 @@ from src.infrastructure.middleware.auth_middleware import AuthMiddleware
 from src.routers.health_router import create_health_router
 from src.routers.application_router import create_application_router
 from src.routers.login_router import create_login_router
+from src.routers.logout_router import create_logout_router
+from src.routers.refresh_token_router import create_refresh_token_router
+from src.routers.userinfo_router import create_userinfo_router
 
 
 def create_app(settings: Settings = None) -> FastAPI:
@@ -98,6 +101,15 @@ def create_app(settings: Settings = None) -> FastAPI:
 
     login_router = create_login_router(container.login_service, settings)
     app.include_router(login_router, prefix=settings.api_prefix)
+
+    logout_router = create_logout_router(container.logout_service, settings)
+    app.include_router(logout_router, prefix=settings.api_prefix)
+
+    refresh_token_router = create_refresh_token_router(container.refresh_token_service, settings)
+    app.include_router(refresh_token_router, prefix=settings.api_prefix)
+
+    userinfo_router = create_userinfo_router(container.user_info_service)
+    app.include_router(userinfo_router, prefix=settings.api_prefix)
 
     return app
 

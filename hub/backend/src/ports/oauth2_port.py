@@ -18,6 +18,16 @@ class Code2TokenResponse:
     expires_in: Optional[int] = None
 
 
+@dataclass
+class RefreshTokenResponse:
+    """OAuth2 Refresh Token 响应"""
+    access_token: str
+    refresh_token: Optional[str] = None
+    id_token: Optional[str] = None
+    token_type: str = "Bearer"
+    expires_in: Optional[int] = None
+
+
 class OAuth2Port(ABC):
     """
     OAuth2 端口接口。
@@ -39,6 +49,35 @@ class OAuth2Port(ABC):
 
         异常:
             Exception: 当转换失败时抛出
+        """
+        pass
+
+    @abstractmethod
+    async def refresh_token(self, refresh_token: str) -> RefreshTokenResponse:
+        """
+        刷新访问令牌。
+
+        参数:
+            refresh_token: 刷新令牌
+
+        返回:
+            RefreshTokenResponse: Token 响应
+
+        异常:
+            Exception: 当刷新失败时抛出
+        """
+        pass
+
+    @abstractmethod
+    async def revoke_token(self, token: str) -> None:
+        """
+        撤销令牌。
+
+        参数:
+            token: 要撤销的令牌（可以是 access_token 或 refresh_token）
+
+        异常:
+            Exception: 当撤销失败时抛出
         """
         pass
 

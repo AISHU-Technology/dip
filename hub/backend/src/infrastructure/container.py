@@ -9,6 +9,9 @@ import logging
 from src.application.health_service import HealthService
 from src.application.application_service import ApplicationService
 from src.application.login_service import LoginService
+from src.application.logout_service import LogoutService
+from src.application.refresh_token_service import RefreshTokenService
+from src.application.user_info_service import UserInfoService
 from src.adapters.health_adapter import HealthAdapter
 from src.adapters.application_adapter import ApplicationAdapter
 from src.adapters.session_adapter import SessionAdapter
@@ -60,6 +63,9 @@ class Container:
         self._user_management_adapter = None
         self._deploy_manager_adapter = None
         self._login_service = None
+        self._logout_service = None
+        self._refresh_token_service = None
+        self._user_info_service = None
     
     @property
     def settings(self) -> Settings:
@@ -171,6 +177,37 @@ class Container:
                 deploy_manager_port=self.deploy_manager_adapter,
             )
         return self._login_service
+
+    @property
+    def logout_service(self) -> LogoutService:
+        """获取登出服务实例（单例）。"""
+        if self._logout_service is None:
+            self._logout_service = LogoutService(
+                session_port=self.session_adapter,
+                oauth2_port=self.oauth2_adapter,
+                deploy_manager_port=self.deploy_manager_adapter,
+            )
+        return self._logout_service
+
+    @property
+    def refresh_token_service(self) -> RefreshTokenService:
+        """获取刷新令牌服务实例（单例）。"""
+        if self._refresh_token_service is None:
+            self._refresh_token_service = RefreshTokenService(
+                session_port=self.session_adapter,
+                oauth2_port=self.oauth2_adapter,
+            )
+        return self._refresh_token_service
+
+    @property
+    def user_info_service(self) -> UserInfoService:
+        """获取用户信息服务实例（单例）。"""
+        if self._user_info_service is None:
+            self._user_info_service = UserInfoService(
+                hydra_port=self.hydra_adapter,
+                user_management_port=self.user_management_adapter,
+            )
+        return self._user_info_service
 
     @property
     def application_service(self) -> ApplicationService:
