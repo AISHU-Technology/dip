@@ -17,6 +17,9 @@ data:
   
   # API 配置
   DIP_HUB_API_PREFIX: "/api/dip-hub/v1"
+
+  # 前端路由配置
+  DIP_HUB_FRONTEND_BASE_PATH: "/"
   
   # 日志配置
   DIP_HUB_LOG_LEVEL: "{{ .service.telemetry.log.level }}"
@@ -46,6 +49,36 @@ data:
   # Agent Factory 服务配置
   DIP_HUB_AGENT_FACTORY_URL: {{ .depServices.agent-factory.url | quote }}
   DIP_HUB_AGENT_FACTORY_TIMEOUT: "{{ .depServices.agent-factory.timeout }}"
+  
+  # Redis 配置
+  DIP_HUB_REDIS_HOST: {{ .depServices.redis.host | quote }}
+  {{- if .depServices.redis.password }}
+  DIP_HUB_REDIS_PASSWORD: {{ .depServices.redis.password | quote }}
+  {{- end }}
+  DIP_HUB_REDIS_DB: "{{ .depServices.redis.database }}"
+  DIP_HUB_REDIS_MIN_IDLE_CONNS: "{{ .depServices.redis.minIdleConns }}"
+  
+  # OAuth2 配置
+  DIP_HUB_OAUTH_CLIENT_ID: {{ .service.oauthClientID | quote }}
+  {{- if .service.oauthClientID2 }}
+  DIP_HUB_OAUTH_CLIENT_ID2: {{ .service.oauthClientID2 | quote }}
+  {{- end }}
+  
+  # Hydra 配置
+  DIP_HUB_HYDRA_HOST: "http://{{ .depServices.hydra.administrativeHost }}:{{ .depServices.hydra.administrativePort }}"
+  DIP_HUB_HYDRA_TIMEOUT: "30"
+  
+  # User Management 服务配置
+  DIP_HUB_USER_MANAGEMENT_URL: "http://{{ .depServices.user-management.privateHost }}:{{ .depServices.user-management.privatePort }}"
+  DIP_HUB_USER_MANAGEMENT_TIMEOUT: "60"
+  
+  # Deploy Manager 服务配置
+  DIP_HUB_DEPLOY_MANAGER_URL: "http://{{ .depServices.deploy-management.host }}:{{ .depServices.deploy-management.port }}"
+  DIP_HUB_DEPLOY_MANAGER_TIMEOUT: "60"
+  
+  # Session Cookie 配置（使用 session-chart 的默认值）
+  DIP_HUB_COOKIE_DOMAIN: {{ .depServices.cookie.domain | quote }}
+  DIP_HUB_COOKIE_TIMEOUT: "{{ .depServices.cookie.timeout }}"
   
   # Mock 模式配置
   DIP_HUB_USE_MOCK_SERVICES: "false"

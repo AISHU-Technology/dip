@@ -33,6 +33,14 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
     
     router = APIRouter(tags=["Login"])
 
+    def _get_frontend_path(path: str = "") -> str:
+        """获取前端路径，处理路径拼接"""
+        base = settings.frontend_base_path.rstrip("/")
+        if path:
+            path = path.lstrip("/")
+            return f"{base}/{path}" if base else f"/{path}"
+        return base if base else "/"
+
     def _get_cookie_value(request: Request, name: str) -> str | None:
         """获取 Cookie 值"""
         return request.cookies.get(name)
@@ -92,8 +100,9 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
                     if asredirect:
                         return RedirectResponse(url=asredirect, status_code=status.HTTP_302_FOUND)
                     else:
+                        frontend_path = _get_frontend_path("login-success")
                         return HTMLResponse(
-                            content=f'<html><body><script>window.location.href="/anyfabric/login-success";</script></body></html>',
+                            content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                             status_code=status.HTTP_200_OK,
                         )
 
@@ -142,8 +151,9 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
 
         except Exception as e:
             logger.exception(f"登录失败: {e}")
+            frontend_path = _get_frontend_path()
             return HTMLResponse(
-                content='<html><body><script>window.location.href="/anyfabric";</script></body></html>',
+                content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                 status_code=status.HTTP_200_OK,
             )
 
@@ -176,8 +186,9 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
             session_id = _get_cookie_value(request, "session_id")
             if not session_id:
                 logger.warning("登录回调：Session ID 不存在")
+                frontend_path = _get_frontend_path()
                 return HTMLResponse(
-                    content='<html><body><script>window.location.href="/anyfabric";</script></body></html>',
+                    content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                     status_code=status.HTTP_200_OK,
                 )
 
@@ -187,8 +198,9 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
             if error or not code:
                 if error and ("request_unauthorized" in error or "request_forbidden" in error):
                     logger.warning(f"登录回调：未授权 - {error}")
+                    frontend_path = _get_frontend_path()
                     return HTMLResponse(
-                        content='<html><body><script>window.location.href="/anyfabric";</script></body></html>',
+                        content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                         status_code=status.HTTP_200_OK,
                     )
                 logger.error(f"登录回调：参数错误 - error: {error}, code: {code}")
@@ -215,8 +227,9 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
                     status_code=status.HTTP_302_FOUND,
                 )
             else:
+                frontend_path = _get_frontend_path("login-success")
                 response = HTMLResponse(
-                    content='<html><body><script>window.location.href="/anyfabric/login-success";</script></body></html>',
+                    content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                     status_code=status.HTTP_200_OK,
                 )
 
@@ -243,14 +256,16 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
 
         except ValueError as e:
             logger.error(f"登录回调失败: {e}")
+            frontend_path = _get_frontend_path("login-failed")
             return HTMLResponse(
-                content='<html><body><script>window.location.href="/anyfabric/login-failed";</script></body></html>',
+                content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                 status_code=status.HTTP_200_OK,
             )
         except Exception as e:
             logger.exception(f"登录回调异常: {e}")
+            frontend_path = _get_frontend_path()
             return HTMLResponse(
-                content='<html><body><script>window.location.href="/anyfabric";</script></body></html>',
+                content=f'<html><body><script>window.location.href="{frontend_path}";</script></body></html>',
                 status_code=status.HTTP_200_OK,
             )
 

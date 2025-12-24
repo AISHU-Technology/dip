@@ -38,6 +38,8 @@ service:
   type: ClusterIP
   port: 8000
   version: "1.0"
+  oauthClientID: ""
+  oauthClientID2: ""
   telemetry:
     log:
       enabled: true
@@ -101,6 +103,14 @@ depServices:
   agent-factory:
     url: http://agent-factory
     timeout: 60
+  # Deploy Manager 服务配置
+  deploy-management:
+    host: deploy-service
+    port: 9703
+  # Session Cookie 配置（参考 session-chart 的 config.sessionExpireSecond）
+  cookie:
+    domain: ""
+    timeout: 7200
 
 # 修改pod资源限制：cpu示例:0.5/500m/1/1000m;memory示例:512Mi/1Gi
 # 内存配置已调高以支持处理几个G的压缩包

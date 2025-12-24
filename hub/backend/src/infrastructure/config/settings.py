@@ -130,6 +130,12 @@ class Settings(BaseSettings):
     cookie_domain: str = Field(default="", description="Cookie 域名")
     cookie_timeout: int = Field(default=3600, description="Cookie 超时时间（秒）")
 
+    # 前端路由配置
+    frontend_base_path: str = Field(
+        default="/",
+        description="前端应用基础路径（用于登录成功/失败后的重定向）"
+    )
+
 
 @lru_cache
 def get_settings() -> Settings:
