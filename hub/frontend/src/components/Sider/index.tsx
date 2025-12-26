@@ -251,7 +251,7 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
 
         {/* 分割线 */}
         {(sidebarData.myAppItem || sidebarData.pinnedItems.length > 0) && (
-          <div className="h-px bg-[--dip-border-color] my-2 ml-px mr-4" />
+          <div className="h-px bg-[--dip-border-color] my-2 ml-px mr-4 shrink-0" />
         )}
 
         {/* 应用商店（app-store） */}
@@ -283,7 +283,7 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
         </div>
 
         {/* 分割线 */}
-        <div className="h-px bg-[--dip-border-color] my-2 mx-1.5" />
+        <div className="h-px bg-[--dip-border-color] my-2 mx-1.5 shrink-0" />
 
         {/* 用户 */}
         <UserMenuItem collapsed={collapsed} />

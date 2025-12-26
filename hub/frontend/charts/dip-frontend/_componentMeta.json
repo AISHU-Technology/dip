@@ -4,7 +4,7 @@
     "version": "1.0.0",
     "configSchema": {
         "title": "dip-frontend",
-        "description": "dip-frontend组件配置定义",
+        "description": "组件配置定义",
         "type": "object",
         "properties": {
             "resources": {
@@ -46,5 +46,10 @@
                 "title": "服务副本数"
             }
         }
-    }
+    },
+    "dependence": [
+        {
+            "name": "class-443"
+        }
+    ]
 }

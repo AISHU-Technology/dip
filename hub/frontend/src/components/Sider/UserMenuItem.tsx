@@ -26,7 +26,7 @@ export const UserMenuItem = ({ collapsed }: UserMenuItemProps) => {
   const content = (
     <div
       className={clsx(
-        'flex items-center h-10 mx-1.5 rounded-md cursor-pointer hover:bg-[--dip-hover-bg-color]',
+        'flex items-center h-10 mx-1.5 rounded-md cursor-pointer hover:bg-[--dip-hover-bg-color] shrink-0',
         collapsed ? 'justify-center px-0' : 'gap-2 px-2.5'
       )}
     >
