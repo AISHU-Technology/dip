@@ -18,6 +18,16 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { userInfo, isLoading, fetchUserInfo } = useUserInfoStore()
   const location = useLocation()
 
+  // 本地开发环境跳过登录验证
+  const isLocalDev =
+    typeof window !== 'undefined' &&
+    window.location.hostname === 'localhost' &&
+    window.location.port === '3001'
+
+  if (isLocalDev) {
+    return <>{children}</>
+  }
+
   // 1) token 校验：无 token 或未登录 -> 登录页
   const token = getAccessToken()
 

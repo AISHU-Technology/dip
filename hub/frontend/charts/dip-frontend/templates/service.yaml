@@ -1,25 +1,19 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.image.name }}
+  name: {{ .Release.Name }}
   namespace: {{ .Values.namespace }}
   labels:
-    app: {{ .Values.image.name }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    release: {{ .Release.Name }}
+    app: {{ .Release.Name }}
 spec:
-  {{- if .Values.service.enableDualStack }}
-  ipFamilyPolicy: PreferDualStack
-  ipFamilies:
-    - IPv6
-    - IPv4
-  {{- end }}
   type: {{ .Values.service.type }}
   ports:
-    - name: {{ .Values.service.ports.name1 }}
-      port: {{ .Values.service.ports.port1 }}
-      targetPort: {{ .Values.service.ports.targetPort1 }}
-      protocol: {{ .Values.service.ports.protocol1 }}
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
   selector:
-    app: {{ .Values.image.name }}
+    app.kubernetes.io/name: {{ include "dip-frontend.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ .Release.Name }}
 
