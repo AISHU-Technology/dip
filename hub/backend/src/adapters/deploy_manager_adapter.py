@@ -42,7 +42,7 @@ class DeployManagerAdapter(DeployManagerPort):
         异常:
             Exception: 当获取失败时抛出
         """
-        url = f"{self._base_url}/api/deploy-manager/v1/host"
+        url = f"{self._base_url}/api/deploy-manager/v1/access-addr/app"
         
         async with httpx.AsyncClient(timeout=self._timeout) as client:
             response = await client.get(url)
