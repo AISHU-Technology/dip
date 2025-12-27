@@ -60,12 +60,14 @@ data:
   
   # OAuth2 配置
   DIP_HUB_OAUTH_CLIENT_ID: {{ .service.oauthClientID | quote }}
+  DIP_HUB_OAUTH_CLIENT_SECRET: {{ .service.oauthClientSecret | quote }}
   {{- if .service.oauthClientID2 }}
   DIP_HUB_OAUTH_CLIENT_ID2: {{ .service.oauthClientID2 | quote }}
   {{- end }}
   
   # Hydra 配置
   DIP_HUB_HYDRA_HOST: "http://{{ .depServices.hydra.administrativeHost }}:{{ .depServices.hydra.administrativePort }}"
+  DIP_HUB_HYDRA_PUBLIC_URL: "http://{{ .depServices.hydra.publicHost }}:{{ .depServices.hydra.publicPort }}"
   DIP_HUB_HYDRA_TIMEOUT: "30"
   
   # User Management 服务配置

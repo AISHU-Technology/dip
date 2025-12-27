@@ -4,8 +4,9 @@ OAuth2 适配器
 实现 OAuth2Port 接口的 HTTP 客户端适配器。
 负责与 OAuth2 服务交互。
 """
+import base64
 import logging
-from urllib.parse import urlencode
+from urllib.parse import quote
 
 import httpx
 
@@ -32,6 +33,32 @@ class OAuth2Adapter(OAuth2Port):
         self._settings = settings
         self._timeout = 30
 
+    def _encode_authorization(self) -> str:
+        """
+        生成 Basic Authentication 头部值。
+        
+        返回:
+            str: Basic Authorization 头部值
+        """
+        client_id = quote(self._settings.oauth_client_id, safe="")
+        client_secret = quote(self._settings.oauth_client_secret, safe="")
+        credentials = f"{client_id}:{client_secret}"
+        encoded = base64.b64encode(credentials.encode()).decode()
+        return f"Basic {encoded}"
+
+    def _get_headers(self) -> dict:
+        """
+        获取 OAuth2 请求的通用头部。
+        
+        返回:
+            dict: 请求头部
+        """
+        return {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Cache-Control": "no-cache",
+            "Authorization": self._encode_authorization(),
+        }
+
     async def code2token(self, code: str, redirect_uri: str) -> Code2TokenResponse:
         """
         将授权码转换为访问令牌。
@@ -46,26 +73,20 @@ class OAuth2Adapter(OAuth2Port):
         异常:
             Exception: 当转换失败时抛出
         """
-        # 从 redirect_uri 中提取 base URL
-        base_url = redirect_uri.split("/oauth2")[0] if "/oauth2" in redirect_uri else redirect_uri
+        # 使用 Hydra Public URL 作为 token 端点
+        token_url = f"{self._settings.hydra_public_url.rstrip('/')}/oauth2/token"
         
-        # OAuth2 token 端点
-        token_url = f"{base_url}/oauth2/token"
+        # 准备请求数据（与 Go 版本一致，使用 URL 编码的字符串）
+        payload = f"grant_type=authorization_code&code={code}&redirect_uri={quote(redirect_uri, safe='')}"
         
-        # 准备请求数据
-        data = {
-            "grant_type": "authorization_code",
-            "code": code,
-            "redirect_uri": redirect_uri,
-            "client_id": self._settings.oauth_client_id,
-        }
+        logger.info(f"code2token request to {token_url}")
         
         # 禁用 SSL 证书验证以避免 certificate_verify_failed
         async with httpx.AsyncClient(timeout=self._timeout, verify=False) as client:
             response = await client.post(
                 token_url,
-                data=data,
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                content=payload,
+                headers=self._get_headers(),
             )
             response.raise_for_status()
             
@@ -92,24 +113,19 @@ class OAuth2Adapter(OAuth2Port):
         异常:
             Exception: 当刷新失败时抛出
         """
-        # 从 Hydra 配置获取 base URL
-        base_url = self._settings.hydra_host.replace("/admin", "").rstrip("/")
+        # 使用 Hydra Public URL 作为 token 端点
+        token_url = f"{self._settings.hydra_public_url.rstrip('/')}/oauth2/token"
         
-        # OAuth2 token 端点
-        token_url = f"{base_url}/oauth2/token"
+        # 准备请求数据（与 Go 版本一致）
+        payload = f"grant_type=refresh_token&refresh_token={refresh_token}"
         
-        # 准备请求数据
-        data = {
-            "grant_type": "refresh_token",
-            "refresh_token": refresh_token,
-            "client_id": self._settings.oauth_client_id,
-        }
+        logger.info(f"refresh_token request to {token_url}")
         
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with httpx.AsyncClient(timeout=self._timeout, verify=False) as client:
             response = await client.post(
                 token_url,
-                data=data,
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                content=payload,
+                headers=self._get_headers(),
             )
             response.raise_for_status()
             
@@ -133,22 +149,17 @@ class OAuth2Adapter(OAuth2Port):
         异常:
             Exception: 当撤销失败时抛出
         """
-        # 从 Hydra 配置获取 base URL
-        base_url = self._settings.hydra_host.replace("/admin", "").rstrip("/")
-        
-        # OAuth2 revoke 端点
-        revoke_url = f"{base_url}/oauth2/revoke"
+        # 使用 Hydra Public URL 作为 revoke 端点
+        revoke_url = f"{self._settings.hydra_public_url.rstrip('/')}/oauth2/revoke"
         
         # 准备请求数据
-        data = {
-            "token": token,
-        }
+        payload = f"token={token}"
         
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
+        async with httpx.AsyncClient(timeout=self._timeout, verify=False) as client:
             response = await client.post(
                 revoke_url,
-                data=data,
-                headers={"Content-Type": "application/x-www-form-urlencoded"},
+                content=payload,
+                headers=self._get_headers(),
             )
             response.raise_for_status()
 

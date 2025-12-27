@@ -16,26 +16,27 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 OAUTH_REGISTRY_CONFIG_PATH = "/etc/globalConfig/oauth/oauth-registry-info.yaml"
 
 
-def _load_oauth_client_id_from_registry() -> Optional[str]:
+def _load_oauth_config_from_registry() -> tuple[Optional[str], Optional[str]]:
     """
-    从 oauth-registry-info.yaml 文件中读取 dip-hub 的 oauthClientID。
+    从 oauth-registry-info.yaml 文件中读取 dip-hub 的 OAuth 配置。
     
     返回:
-        Optional[str]: OAuth 客户端 ID，如果文件不存在或解析失败则返回 None。
+        tuple[Optional[str], Optional[str]]: (oauthClientID, oauthClientSecret)
     """
     if not os.path.exists(OAUTH_REGISTRY_CONFIG_PATH):
-        return None
+        return None, None
     
     try:
         with open(OAUTH_REGISTRY_CONFIG_PATH, "r", encoding="utf-8") as f:
             config = yaml.safe_load(f)
         
         if config and "dip-hub" in config:
-            return config["dip-hub"].get("oauthClientID")
+            dip_hub = config["dip-hub"]
+            return dip_hub.get("oauthClientID"), dip_hub.get("oauthClientSecret")
     except Exception:
         pass
     
-    return None
+    return None, None
 
 
 class Settings(BaseSettings):
@@ -124,29 +125,34 @@ class Settings(BaseSettings):
 
     # OAuth2 配置
     oauth_client_id: str = Field(default="", description="OAuth2 客户端 ID")
+    oauth_client_secret: str = Field(default="", description="OAuth2 客户端 Secret")
     oauth_client_id2: Optional[str] = Field(default=None, description="OAuth2 客户端 ID2")
 
     @model_validator(mode="after")
-    def load_oauth_client_id_from_registry(self) -> "Settings":
+    def load_oauth_config_from_registry(self) -> "Settings":
         """
-        从 oauth-registry-info.yaml 文件中加载 oauth_client_id。
+        从 oauth-registry-info.yaml 文件中加载 OAuth 配置。
         
         优先级逻辑：
         1. 如果配置文件中有值，使用配置文件中的值（最高优先级）
         2. 如果配置文件中没有值，但环境变量有值，保持环境变量的值
         3. 如果都没有，使用默认空字符串
         """
-        registry_client_id = _load_oauth_client_id_from_registry()
+        registry_client_id, registry_client_secret = _load_oauth_config_from_registry()
         if registry_client_id:
-            # 配置文件中有值，优先使用
             object.__setattr__(self, "oauth_client_id", registry_client_id)
-        # 如果配置文件没有值，保持环境变量加载的值（pydantic-settings 默认行为）
+        if registry_client_secret:
+            object.__setattr__(self, "oauth_client_secret", registry_client_secret)
         return self
 
     # Hydra 配置
     hydra_host: str = Field(
         default="http://localhost:4445",
-        description="Hydra 管理服务地址"
+        description="Hydra 管理服务地址（Admin API）"
+    )
+    hydra_public_url: str = Field(
+        default="http://localhost:4444",
+        description="Hydra 公开服务地址（Public API）"
     )
     hydra_timeout: int = Field(default=30, description="Hydra 请求超时时间（秒）")
 
