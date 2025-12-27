@@ -83,26 +83,50 @@ class OAuth2Adapter(OAuth2Port):
             "redirect_uri": redirect_uri,
         }
         
-        logger.info(f"code2token request to {token_url}, redirect_uri={redirect_uri}")
+        headers = self._get_headers()
+        
+        # 打印 curl 命令（与真实请求一致）
+        from urllib.parse import urlencode
+        form_data = urlencode(data)
+        curl_cmd = (
+            f"curl -X POST '{token_url}' "
+            f"-H 'Content-Type: application/x-www-form-urlencoded' "
+            f"-H 'cache-control: no-cache' "
+            f"-H 'Authorization: {headers['Authorization']}' "
+            f"-d '{form_data}' "
+            f"--insecure"
+        )
+        logger.info("[code2token] cURL request: %s", curl_cmd)
         
         # 禁用 SSL 证书验证以避免 certificate_verify_failed
-        async with httpx.AsyncClient(timeout=self._timeout, verify=False) as client:
-            response = await client.post(
-                token_url,
-                data=data,
-                headers=self._get_headers(),
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout, verify=False) as client:
+                response = await client.post(
+                    token_url,
+                    data=data,
+                    headers=headers,
+                )
+                response.raise_for_status()
+                
+                token_data = response.json()
+                
+                return Code2TokenResponse(
+                    access_token=token_data.get("access_token", ""),
+                    refresh_token=token_data.get("refresh_token"),
+                    id_token=token_data.get("id_token"),
+                    token_type=token_data.get("token_type", "Bearer"),
+                    expires_in=token_data.get("expires_in"),
+                )
+        except httpx.HTTPStatusError as exc:
+            logger.error(
+                "[code2token] HTTPStatusError: %s\nResponse content: %s",
+                exc,
+                exc.response.text if exc.response is not None else "<no response>"
             )
-            response.raise_for_status()
-            
-            token_data = response.json()
-            
-            return Code2TokenResponse(
-                access_token=token_data.get("access_token", ""),
-                refresh_token=token_data.get("refresh_token"),
-                id_token=token_data.get("id_token"),
-                token_type=token_data.get("token_type", "Bearer"),
-                expires_in=token_data.get("expires_in"),
-            )
+            raise
+        except Exception as exc:
+            logger.exception("[code2token] Unexpected Error: %s", exc)
+            raise
 
     async def refresh_token(self, refresh_token: str) -> RefreshTokenResponse:
         """
