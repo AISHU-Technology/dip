@@ -80,7 +80,7 @@ class OAuth2Adapter(OAuth2Port):
         data = {
             "grant_type": "authorization_code",
             "code": code,
-            "redirect_uri": redirect_uri,
+            "redirect_uri": f"{redirect_uri.rstrip('/')}/api/dip-hub/v1/login/callback",
         }
         
         headers = self._get_headers()
