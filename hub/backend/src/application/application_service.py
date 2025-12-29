@@ -253,13 +253,42 @@ class ApplicationService:
             with zipfile.ZipFile(zip_path, 'r') as zip_ref:
                 zip_ref.extractall(extract_dir)
             
-            # 解析 manifest.yaml
+            # 查找 manifest.yaml 文件
+            # 1. 先在根目录查找
             manifest_path = os.path.join(extract_dir, "manifest.yaml")
             if not os.path.exists(manifest_path):
                 manifest_path = os.path.join(extract_dir, "manifest.yml")
             
+            # 2. 如果根目录没有，查找 application.key 文件所在的目录
+            if not os.path.exists(manifest_path):
+                # 查找 application.key 文件
+                app_key_path = None
+                for root, dirs, files in os.walk(extract_dir):
+                    if "application.key" in files:
+                        app_key_path = root
+                        break
+                
+                if app_key_path:
+                    # 在 application.key 所在目录查找 manifest.yaml
+                    manifest_path = os.path.join(app_key_path, "manifest.yaml")
+                    if not os.path.exists(manifest_path):
+                        manifest_path = os.path.join(app_key_path, "manifest.yml")
+            
+            # 3. 如果还是没找到，递归查找所有 manifest.yaml 文件
+            if not os.path.exists(manifest_path):
+                for root, dirs, files in os.walk(extract_dir):
+                    if "manifest.yaml" in files:
+                        manifest_path = os.path.join(root, "manifest.yaml")
+                        break
+                    elif "manifest.yml" in files:
+                        manifest_path = os.path.join(root, "manifest.yml")
+                        break
+            
             if not os.path.exists(manifest_path):
                 raise ValueError("安装包缺少 manifest.yaml 文件")
+            
+            # 获取 manifest.yaml 所在的目录，作为应用包的根目录
+            manifest_dir = os.path.dirname(manifest_path)
             
             with open(manifest_path, "r", encoding="utf-8") as f:
                 manifest_data = yaml.safe_load(f)
@@ -274,27 +303,27 @@ class ApplicationService:
                         f"版本号冲突: 新版本 {manifest.version} 必须大于已安装版本 {existing_app.version}"
                     )
             
-            # 读取图标
+            # 读取图标（路径相对于 manifest.yaml 所在目录）
             icon_base64 = None
             if manifest.icon_path:
-                icon_full_path = os.path.join(extract_dir, manifest.icon_path)
+                icon_full_path = os.path.join(manifest_dir, manifest.icon_path)
                 if os.path.exists(icon_full_path):
                     with open(icon_full_path, "rb") as f:
                         icon_base64 = base64.b64encode(f.read()).decode("utf-8")
             
-            # 上传镜像
+            # 上传镜像（路径相对于 manifest.yaml 所在目录）
             release_configs = []
             if self._deploy_installer_port:
                 for image_path in manifest.images:
-                    image_full_path = os.path.join(extract_dir, image_path)
+                    image_full_path = os.path.join(manifest_dir, image_path)
                     if os.path.exists(image_full_path):
                         with open(image_full_path, "rb") as f:
                             await self._deploy_installer_port.upload_image(f, auth_token=auth_token)
                 
-                # 上传 Chart 并安装
+                # 上传 Chart 并安装（路径相对于 manifest.yaml 所在目录）
                 for chart_config in manifest.charts:
                     chart_path = chart_config.get("path", "")
-                    chart_full_path = os.path.join(extract_dir, chart_path)
+                    chart_full_path = os.path.join(manifest_dir, chart_path)
                     if os.path.exists(chart_full_path):
                         with open(chart_full_path, "rb") as f:
                             chart_result = await self._deploy_installer_port.upload_chart(f, auth_token=auth_token)
