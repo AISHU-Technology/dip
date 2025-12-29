@@ -28,7 +28,9 @@ export const BottomLinkItem = ({
       <span className="w-4 h-4 flex items-center justify-center">
         {item.icon}
       </span>
-      <span className={clsx('text-sm text-[#000]', collapsed && 'hidden')}>
+      <span
+        className={clsx('text-sm text-[#000] truncate', collapsed && 'hidden')}
+      >
         {item.label}
       </span>
     </div>

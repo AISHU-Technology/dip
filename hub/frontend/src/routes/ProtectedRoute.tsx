@@ -37,6 +37,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const token = getAccessToken()
 
   // 检查是否在登录相关页面（避免循环重定向）
+  // 注意：location.pathname 是相对于 basename 的路径（如 /login），不是完整路径
   const isLoginPage =
     location.pathname === '/login' ||
     location.pathname === '/login-success' ||
@@ -46,7 +47,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // 构建当前路径（用于重定向）
   const currentPath = location.pathname + location.search
   const buildLoginUrl = (path: string) =>
-    path === '/'
+    path === '/' || path === getFullPath('/')
       ? '/login'
       : `/login?asredirect=${encodeURIComponent(getFullPath(path))}`
 
