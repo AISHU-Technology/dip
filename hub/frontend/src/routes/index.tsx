@@ -53,27 +53,27 @@ const generateRoutesFromConfig = (): RouteObject[] => {
 export const router = createBrowserRouter(
   [
     {
-      path: 'login',
+      path: '/login',
       element: <Login />,
     },
     // 登录成功页面
     {
-      path: 'login-success',
+      path: '/login-success',
       element: <LoginSuccess />,
     },
     // 登录失败页面
     {
-      path: 'login-failed',
+      path: '/login-failed',
       element: <LoginFailed />,
     },
     // 403 页面
     {
-      path: '403',
+      path: '/403',
       element: <NoAccess />,
     },
     // 505 页面
     {
-      path: '505',
+      path: '/505',
       element: <ServerError />,
     },
     // 受保护区域（除 login/login-failed/403/404/505 外的所有页面）
