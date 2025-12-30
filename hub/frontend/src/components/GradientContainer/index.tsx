@@ -1,16 +1,13 @@
 import classNames from 'classnames'
 import React, { type CSSProperties, type ReactNode, useMemo } from 'react'
 import bg from '@/assets/images/background.png'
+
 interface GradientContainerProps {
   children: ReactNode
   className?: string
   style?: CSSProperties
 }
-const GradientContainer: React.FC<GradientContainerProps> = ({
-  children,
-  className,
-  style,
-}) => {
+const GradientContainer: React.FC<GradientContainerProps> = ({ children, className, style }) => {
   const wrapperStyle = useMemo(() => {
     const temp = {
       backgroundImage: `url(${bg})`,

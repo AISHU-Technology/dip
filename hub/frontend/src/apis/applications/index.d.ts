@@ -82,4 +82,3 @@ export interface PinMicroAppParams {
   /** 是否钉住 */
   pinned: boolean
 }
-

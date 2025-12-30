@@ -1,9 +1,9 @@
-import { Navigate, useLocation } from 'react-router-dom'
-import { useEffect, useRef } from 'react'
-import { useUserInfoStore } from '../stores'
-import { getAccessToken } from '@/utils/http/token-config'
-import { getFullPath } from '@/utils/config'
 import { Spin } from 'antd'
+import { useEffect, useRef } from 'react'
+import { Navigate, useLocation } from 'react-router-dom'
+import { getFullPath } from '@/utils/config'
+import { getAccessToken } from '@/utils/http/token-config'
+import { useUserInfoStore } from '../stores'
 
 interface ProtectedRouteProps {
   children: React.ReactNode

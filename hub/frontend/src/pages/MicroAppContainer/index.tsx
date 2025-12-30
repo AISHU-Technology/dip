@@ -1,21 +1,16 @@
-import { useState, useEffect } from 'react'
 import { Spin } from 'antd'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import {
-  getApplicationsBasicInfo,
-  type ApplicationBasicInfo,
-} from '@/apis/applications'
+import { type ApplicationBasicInfo, getApplicationsBasicInfo } from '@/apis/applications'
+import Empty from '@/components/Empty'
+import { getFullPath } from '@/utils/config'
+import { setMicroAppGlobalState } from '@/utils/micro-app/globalState'
 import MicroAppComponent from '../../components/MicroAppComponent'
 import { useMicroAppStore } from '../../stores/microAppStore'
-import { setMicroAppGlobalState } from '@/utils/micro-app/globalState'
-import { getFullPath } from '@/utils/config'
-import Empty from '@/components/Empty'
 
 const MicroAppContainer = () => {
   const { appName } = useParams<{ appName: string }>()
-  const [appBasicInfo, setAppBasicInfo] = useState<ApplicationBasicInfo | null>(
-    null
-  )
+  const [appBasicInfo, setAppBasicInfo] = useState<ApplicationBasicInfo | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { setCurrentMicroApp, clearCurrentMicroApp } = useMicroAppStore()
@@ -39,9 +34,7 @@ const MicroAppContainer = () => {
           // 需要知道浏览器中的完整路径才能正确匹配路由
           setCurrentMicroApp({
             ...appData,
-            routeBasename: getFullPath(
-              `/application/${appData.micro_app.name}`
-            ),
+            routeBasename: getFullPath(`/application/${appData.micro_app.name}`),
           })
         }
       } catch (err: any) {
@@ -68,7 +61,7 @@ const MicroAppContainer = () => {
         {
           breadcrumb: [],
         },
-        { allowAllFields: true }
+        { allowAllFields: true },
       )
     }
   }, [appName])
@@ -92,9 +85,7 @@ const MicroAppContainer = () => {
   }
 
   return (
-    <div className="h-full w-full flex flex-col overflow-hidden relative">
-      {renderContent()}
-    </div>
+    <div className="h-full w-full flex flex-col overflow-hidden relative">{renderContent()}</div>
   )
 }
 

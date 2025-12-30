@@ -40,7 +40,7 @@ export interface MicroAppProps {
   /** 监听全局状态变化，返回取消监听的函数 */
   onMicroAppStateChange: (
     callback: (state: any, prev: any) => void,
-    fireImmediately?: boolean
+    fireImmediately?: boolean,
   ) => () => void
 
   /** ========== UI 相关 ========== */

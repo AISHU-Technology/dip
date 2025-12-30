@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
-import { getApplications, type ApplicationInfo } from '@/apis/applications'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { type ApplicationInfo, getApplications } from '@/apis/applications'
 
 interface UseApplicationsServiceOptions {
   /** 是否自动加载，默认为 true */
@@ -18,9 +18,7 @@ interface UseApplicationsServiceOptions {
  * @returns {Function} handleRefresh 刷新数据
  * @returns {Function} fetchAppList 手动触发获取应用列表（用于手动加载模式）
  */
-export const useApplicationsService = (
-  options: UseApplicationsServiceOptions = {}
-) => {
+export const useApplicationsService = (options: UseApplicationsServiceOptions = {}) => {
   const { autoLoad = true } = options
   const [apps, setApps] = useState<ApplicationInfo[]>([])
   const [loading, setLoading] = useState(false)
@@ -51,9 +49,7 @@ export const useApplicationsService = (
       currentRequestRef.current = null
 
       const filtered = keyword
-        ? apps.filter((a) =>
-            a.name?.toLowerCase().includes(keyword.toLowerCase())
-          )
+        ? apps.filter((a) => a.name?.toLowerCase().includes(keyword.toLowerCase()))
         : apps
       setApps(filtered)
     } catch (err: any) {

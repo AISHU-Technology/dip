@@ -11,12 +11,7 @@
  * @param compareContext 比较函数上下文
  * @returns 是否相等
  */
-function shallowEqual(
-  objA: any,
-  objB: any,
-  compare?: any,
-  compareContext?: any
-): boolean {
+function shallowEqual(objA: any, objB: any, compare?: any, compareContext?: any): boolean {
   var ret = compare ? compare.call(compareContext, objA, objB) : void 0
 
   if (ret !== void 0) {

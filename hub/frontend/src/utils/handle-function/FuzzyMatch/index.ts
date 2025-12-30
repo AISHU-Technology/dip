@@ -1,5 +1,5 @@
 // 字符串
-const isString = (str: any) => typeof str === 'string';
+const isString = (str: any) => typeof str === 'string'
 
 /**
  * 基于indexOf的模糊匹配, 如果用正则, 对 * + ? 等特殊字符比较难处理
@@ -7,12 +7,12 @@ const isString = (str: any) => typeof str === 'string';
  * @param {String} text 文本
  */
 const fuzzyMatch = (keyWord: string, text: string) => {
-    if (!isString(keyWord) && !isString(text)) return;
+  if (!(isString(keyWord) || isString(text))) return
 
-    const k = keyWord?.toLowerCase();
-    const t = text?.toLowerCase();
+  const k = keyWord?.toLowerCase()
+  const t = text?.toLowerCase()
 
-    return t.indexOf(k) !== -1;
-};
+  return t.indexOf(k) !== -1
+}
 
-export { fuzzyMatch };
+export { fuzzyMatch }

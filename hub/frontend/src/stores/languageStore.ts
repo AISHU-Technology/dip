@@ -18,6 +18,6 @@ export const useLanguageStore = create<LanguageState>()(
       partialize: (state) => ({
         language: state.language,
       }),
-    }
-  )
+    },
+  ),
 )

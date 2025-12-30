@@ -1,6 +1,6 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
-import { getFullPath, BASE_PATH, normalizePath } from '@/utils/config'
+import { BASE_PATH, getFullPath, normalizePath } from '@/utils/config'
 
 export interface HttpConfig {
   accessToken: string
@@ -22,12 +22,9 @@ export function getAccessToken(): string {
 let refreshingPromise: Promise<{ accessToken: string }> | null = null
 
 async function doRefreshTokenRequest(): Promise<{ accessToken: string }> {
-  const response = await axios.get<{ access_token: string }>(
-    '/api/dip-hub/v1/refresh-token',
-    {
-      withCredentials: true, // 确保携带 Cookie
-    }
-  )
+  const response = await axios.get<{ access_token: string }>('/api/dip-hub/v1/refresh-token', {
+    withCredentials: true, // 确保携带 Cookie
+  })
   const newToken = response.data?.access_token
   if (!newToken) {
     throw new Error('刷新 token 接口未返回 access_token')

@@ -3,26 +3,24 @@
     .dip-tabs-nav::before {
       border-bottom: none;
     }
-    .dip-tabs-tab {
-      color: rgba(0, 0, 0, 0.65);
-    }
 
-    // .dip-tabs-tab-active .dip-tabs-tab-btn {
-    //   color: rgba(0, 0, 0, 0.85) !important;
-    //   font-weight: 700;
-    // }
+    .dip-tabs-tab {
+      color: rgb(0 0 0 / 65%);
+    }
   }
 }
 
-// 隐藏滚动条但保持可滚动
+/* 隐藏滚动条但保持可滚动 */
 .hideScrollbar {
   overflow: auto;
-  // Firefox
+
+  /* Firefox */
   scrollbar-width: none;
-  // IE and Edge
+
+  /* IE and Edge */
   -ms-overflow-style: none;
 
-  // Webkit浏览器
+  /* Webkit浏览器 */
   &::-webkit-scrollbar {
     width: 0;
     height: 0;

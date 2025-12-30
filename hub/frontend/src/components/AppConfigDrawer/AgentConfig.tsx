@@ -1,8 +1,7 @@
-import { useState, useEffect, memo } from 'react'
-import { Spin, Alert } from 'antd'
 import { ShareAltOutlined } from '@ant-design/icons'
-import { getApplicationsAgents } from '@/apis/applications'
-import type { AgentInfo } from '@/apis/applications'
+import { Alert, Spin } from 'antd'
+import { memo, useEffect, useState } from 'react'
+import { type AgentInfo, getApplicationsAgents } from '@/apis/applications'
 
 interface AgentConfigProps {
   appId?: string
@@ -43,9 +42,7 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
 
   return (
     <div className="flex flex-col gap-y-2">
-      <div className="text-sm font-medium text-[--dip-text-color]">
-        智能体配置
-      </div>
+      <div className="text-sm font-medium text-[--dip-text-color]">智能体配置</div>
 
       {/* 提示信息框 */}
       <Alert
@@ -58,9 +55,7 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
       {/* 智能体列表 */}
       <div className="flex flex-col gap-3">
         {agents.length === 0 ? (
-          <div className="text-center text-[--dip-text-color-secondary] py-8">
-            暂无智能体配置
-          </div>
+          <div className="text-center text-[--dip-text-color-secondary] py-8">暂无智能体配置</div>
         ) : (
           agents.map((item) => {
             // 假设从接口获取的数据结构，如果没有则使用默认值
@@ -79,17 +74,13 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
 
                 {/* 描述 */}
                 {item.description && (
-                  <div className="text-xs text-[rgba(0,0,0,0.45)]">
-                    {item.description}
-                  </div>
+                  <div className="text-xs text-[rgba(0,0,0,0.45)]">{item.description}</div>
                 )}
 
                 {/* 提示词 */}
                 {prompt && (
                   <div className="flex flex-col gap-y-1">
-                    <div className="text-xs text-[rgba(0,0,0,0.45)]">
-                      提示词
-                    </div>
+                    <div className="text-xs text-[rgba(0,0,0,0.45)]">提示词</div>
                     <div className="rounded-lg bg-[#F9FAFC] p-3.5 text-xs text-[--dip-text-color] leading-relaxed">
                       {prompt}
                     </div>
@@ -99,9 +90,7 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
                 {/* 技能列表 */}
                 {skills.length > 0 && (
                   <div className="flex flex-col gap-y-1">
-                    <div className="text-xs text-[rgba(0,0,0,0.45)]">
-                      技能列表
-                    </div>
+                    <div className="text-xs text-[rgba(0,0,0,0.45)]">技能列表</div>
                     <div className="flex flex-col gap-y-1.5 pl-5">
                       {skills.map((skill: string, index: number) => (
                         <div key={index} className="flex items-start gap-3.5">

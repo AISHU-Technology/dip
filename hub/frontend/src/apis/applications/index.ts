@@ -1,30 +1,23 @@
 import { del, get, post, put } from '@/utils/http'
 import type {
-  ApplicationInfo,
-  ApplicationBasicInfo,
   AgentList,
+  ApplicationBasicInfo,
   ApplicationConfigRequest,
+  ApplicationInfo,
   OntologyList,
-  PinnedMicroAppsResponse,
   PinMicroAppParams,
+  PinnedMicroAppsResponse,
 } from './index.d'
 
 // 导出类型定义（仅导出外部使用的类型）
-export type {
-  ApplicationInfo,
-  ApplicationBasicInfo,
-  OntologyInfo,
-  AgentInfo,
-}
+export type { ApplicationInfo, ApplicationBasicInfo, OntologyInfo, AgentInfo }
 
 /**
  * 安装应用
  * OpenAPI: POST /applications (application/octet-stream, binary)
  * @returns 应用信息
  */
-export const postApplications = (
-  file: Blob | ArrayBuffer
-): Promise<ApplicationInfo> => {
+export const postApplications = (file: Blob | ArrayBuffer): Promise<ApplicationInfo> => {
   return post(`/api/dip-hub/v1/applications`, {
     body: file,
     headers: { 'Content-Type': 'application/octet-stream' },
@@ -35,8 +28,7 @@ export const postApplications = (
  * 获取应用列表
  * @returns 应用列表
  */
-export const getApplications = (): Promise<ApplicationInfo[]> =>
-  get(`/api/dip-hub/v1/applications`)
+export const getApplications = (): Promise<ApplicationInfo[]> => get(`/api/dip-hub/v1/applications`)
 
 /**
  * 配置应用（业务知识网络 & 智能体）
@@ -44,7 +36,7 @@ export const getApplications = (): Promise<ApplicationInfo[]> =>
  */
 export const putApplicationsConfig = (
   appId: string,
-  body: ApplicationConfigRequest
+  body: ApplicationConfigRequest,
 ): Promise<ApplicationInfo> =>
   put(`/api/dip-hub/v1/applications/config`, {
     params: { app_id: appId },
@@ -74,9 +66,7 @@ export const getApplicationsBasicInfo = (params: {
  * 查看业务知识网络配置
  * OpenAPI: GET /applications/ontologies?app_id=xxx
  */
-export const getApplicationsOntologies = (
-  appId: string
-): Promise<OntologyList> =>
+export const getApplicationsOntologies = (appId: string): Promise<OntologyList> =>
   get(`/api/dip-hub/v1/applications/ontologies`, { params: { app_id: appId } })
 
 /**
@@ -119,4 +109,3 @@ export async function pinMicroAppApi(params: PinMicroAppParams): Promise<void> {
   await new Promise((resolve) => setTimeout(resolve, 200))
   console.log('Pin micro app:', params) // 避免未使用警告
 }
-

@@ -1,6 +1,5 @@
 import { get } from '@/utils/http'
-import type { AppConfigResponse } from './index.d'
-import type { OEMConfig } from './index.d'
+import type { AppConfigResponse, OEMConfig } from './index.d'
 
 export type { OEMConfig } from './index.d'
 
@@ -64,7 +63,7 @@ function getSectionByLanguage(language: string): string {
  */
 export function getOEMConfigApi(
   language: string = 'zh-CN',
-  product: string = 'dip'
+  product: string = 'dip',
 ): Promise<OEMConfig> {
   const section = getSectionByLanguage(language)
   return get('/api/deploy-web-service/v1/oemconfig', {

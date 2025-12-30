@@ -1,6 +1,6 @@
+import { create } from 'zustand'
 import type { OEMConfig } from '@/apis'
 import { getOEMConfigApi } from '@/apis/config'
-import { create } from 'zustand'
 
 /** OEM 配置状态 */
 interface OEMConfigState {
@@ -50,10 +50,7 @@ export const useOEMConfigStore = create<OEMConfigState>((set, get) => ({
     const keys = Object.keys(oemConfigs)
     return keys.length > 0 ? oemConfigs[keys[0]] : null
   },
-  initialize: async (
-    languages = ['zh-CN', 'zh-TW', 'en-US'],
-    product = 'dip'
-  ) => {
+  initialize: async (languages = ['zh-CN', 'zh-TW', 'en-US'], product = 'dip') => {
     const { initialized } = get()
     // 如果已经初始化过，跳过
     if (initialized) {
@@ -65,7 +62,7 @@ export const useOEMConfigStore = create<OEMConfigState>((set, get) => ({
     try {
       // 并行加载所有语言的配置
       const configPromises = languages.map((lang) =>
-        getOEMConfigApi(lang, product).then((config) => ({ lang, config }))
+        getOEMConfigApi(lang, product).then((config) => ({ lang, config })),
       )
 
       const results = await Promise.allSettled(configPromises)
@@ -84,10 +81,7 @@ export const useOEMConfigStore = create<OEMConfigState>((set, get) => ({
         error: null,
       })
     } catch (error) {
-      const err =
-        error instanceof Error
-          ? error
-          : new Error('Failed to initialize OEM config')
+      const err = error instanceof Error ? error : new Error('Failed to initialize OEM config')
       set({
         loading: false,
         error: err,

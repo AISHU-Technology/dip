@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
-import { Avatar, Button, Dropdown } from 'antd'
 import type { MenuProps } from 'antd'
+import { Avatar, Button, Dropdown } from 'antd'
+import { useMemo } from 'react'
+import AppMenuIcon from '@/assets/images/header/menu.svg?react'
 import { useApplicationsService } from '@/hooks/useApplicationsService'
 import { getFullPath } from '@/utils/config'
-import AppMenuIcon from '@/assets/images/header/menu.svg?react'
 
 /**
  * 导航菜单图标按钮组件
@@ -46,7 +46,7 @@ export const AppMenu = () => {
             label: app.name,
           }))
         : [],
-    [apps]
+    [apps],
   )
 
   return (

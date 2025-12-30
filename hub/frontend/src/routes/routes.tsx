@@ -1,10 +1,7 @@
 import { lazy } from 'react'
+import { SYSTEM_FIXED_APP_ADMIN_USER_ID, SYSTEM_FIXED_NORMAL_USER_ID } from '@/apis/types'
 import applicationsUrl from '@/assets/images/sider/applications.svg'
 import appStoreUrl from '@/assets/images/sider/appStore.svg'
-import {
-  SYSTEM_FIXED_APP_ADMIN_USER_ID,
-  SYSTEM_FIXED_NORMAL_USER_ID,
-} from '@/apis/types'
 import type { RouteConfig } from './types'
 
 const MyApp = lazy(() => import('../pages/MyApp'))

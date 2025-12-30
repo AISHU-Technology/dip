@@ -1,10 +1,10 @@
-import { useState } from 'react'
-import type { ReactNode } from 'react'
-import { useMatches } from 'react-router-dom'
 import { Layout } from 'antd'
-import Sider from '../../components/Sider'
-import MicroAppHeader from '../../components/MicroAppHeader'
+import type { ReactNode } from 'react'
+import { useState } from 'react'
+import { useMatches } from 'react-router-dom'
 import { useMicroAppStore } from '@/stores/microAppStore'
+import MicroAppHeader from '../../components/MicroAppHeader'
+import Sider from '../../components/Sider'
 
 const { Content } = Layout
 
@@ -34,8 +34,7 @@ const Container = ({ children }: ContainerProps) => {
   // 只使用最后一个匹配的路由（当前路由）的布局配置
   // 主应用页面只依赖路由的静态布局配置
   const currentMatch = matches[matches.length - 1]
-  const routeLayoutConfig = (currentMatch?.handle as RouteHandle | undefined)
-    ?.layout
+  const routeLayoutConfig = (currentMatch?.handle as RouteHandle | undefined)?.layout
 
   // 布局决策：
   // - headless 微应用：强制 { hasHeader: false, hasSider: false }
@@ -67,9 +66,7 @@ const Container = ({ children }: ContainerProps) => {
             height: hasHeader ? `calc(100vh - ${headerHeight}px)` : '100vh',
           }}
         >
-          <Content className="relative bg-white min-w-[1040px] m-0">
-            {children}
-          </Content>
+          <Content className="relative bg-white min-w-[1040px] m-0">{children}</Content>
         </Layout>
       </Layout>
     </Layout>

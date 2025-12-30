@@ -1,5 +1,5 @@
-import { AppStoreActionEnum } from './types'
 import IconFont from '@/components/IconFont'
+import { AppStoreActionEnum } from './types'
 
 /** 应用商店操作菜单项 */
 export const getAppStoreMenuItems = () => {

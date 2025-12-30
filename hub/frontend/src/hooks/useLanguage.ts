@@ -1,8 +1,8 @@
 import { useRef } from 'react'
 import intl from 'react-intl-universal'
-import { useLanguageStore } from '../stores/languageStore'
 import { DEFAULT_LOCALE, getNavigatorLanguage } from '../i18n/config'
 import locales from '../i18n/locales'
+import { useLanguageStore } from '../stores/languageStore'
 // TODO: 后端接口待接入，暂时注释导入
 // import { getAppConfigApi, postLanguageApi } from '../apis/config'
 import { setMicroAppGlobalState } from '../utils/micro-app/globalState'
@@ -59,8 +59,7 @@ export const useLanguage = () => {
   const initLanguage = async () => {
     // 1. 使用本地可用语言同步初始化，避免首屏阻塞在接口上
     const persistedLanguage = useLanguageStore.getState().language
-    const fallbackLanguage =
-      persistedLanguage || getNavigatorLanguage() || DEFAULT_LOCALE
+    const fallbackLanguage = persistedLanguage || getNavigatorLanguage() || DEFAULT_LOCALE
 
     await initI18n(fallbackLanguage)
     // 同步到微应用全局状态，通知所有微应用当前语言
@@ -68,7 +67,7 @@ export const useLanguage = () => {
       {
         language: fallbackLanguage,
       },
-      { allowAllFields: true }
+      { allowAllFields: true },
     )
 
     // 2. 异步同步后端语言配置（不阻塞首屏）
@@ -109,7 +108,7 @@ export const useLanguage = () => {
         {
           language: lang,
         },
-        { allowAllFields: true }
+        { allowAllFields: true },
       )
     } catch (error) {
       console.warn('Failed to set language config on server:', error)

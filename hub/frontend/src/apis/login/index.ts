@@ -35,4 +35,3 @@ export function getLogoutUrl(): string {
 export function refreshToken(): Promise<RefreshTokenResponse> {
   return get(`/api/dip-hub/v1/refresh-token`)
 }
-

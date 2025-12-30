@@ -1,19 +1,16 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
-import { loadMicroApp, type MicroApp as QiankunMicroApp } from 'qiankun'
 import { message, Spin } from 'antd'
-import { useUserInfoStore, useMicroAppStore } from '@/stores'
-import { httpConfig, getAccessToken } from '@/utils/http/token-config'
+import { loadMicroApp, type MicroApp as QiankunMicroApp } from 'qiankun'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import type { Root as ReactRoot } from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
+import type { ApplicationBasicInfo } from '@/apis/applications'
+import { useMicroAppStore, useUserInfoStore } from '@/stores'
 import { getFullPath } from '@/utils/config'
-import {
-  setMicroAppGlobalState,
-  onMicroAppGlobalStateChange,
-} from '@/utils/micro-app/globalState'
+import { getAccessToken, httpConfig } from '@/utils/http/token-config'
+import { onMicroAppGlobalStateChange, setMicroAppGlobalState } from '@/utils/micro-app/globalState'
+import type { MicroAppProps } from '@/utils/micro-app/types'
 import { AppMenu } from '../MicroAppHeader/AppMenu'
 import { UserInfo } from '../MicroAppHeader/UserInfo'
-import { createRoot } from 'react-dom/client'
-import type { Root as ReactRoot } from 'react-dom/client'
-import type { ApplicationBasicInfo } from '@/apis/applications'
-import type { MicroAppProps } from '@/utils/micro-app/types'
 
 interface MicroAppComponentProps {
   /** 应用基础信息 */
@@ -39,8 +36,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
         get accessToken() {
           return getAccessToken()
         },
-        refreshToken:
-          httpConfig.refreshToken || (async () => ({ accessToken: '' })),
+        refreshToken: httpConfig.refreshToken || (async () => ({ accessToken: '' })),
         onTokenExpired: httpConfig.onTokenExpired,
       },
 
@@ -70,9 +66,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
       renderAppMenu: (container: HTMLElement | string) => {
         // 支持传入元素或元素 ID
         const targetContainer =
-          typeof container === 'string'
-            ? document.getElementById(container)
-            : container
+          typeof container === 'string' ? document.getElementById(container) : container
 
         if (!targetContainer) {
           console.warn('容器元素不存在:', container)
@@ -80,8 +74,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
         }
 
         // 清理旧的渲染实例
-        const containerKey =
-          typeof container === 'string' ? container : container.id || 'app-menu'
+        const containerKey = typeof container === 'string' ? container : container.id || 'app-menu'
         const oldRoot = appMenuRootRef.current.get(containerKey)
         if (oldRoot) {
           oldRoot.unmount()
@@ -95,9 +88,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
       renderUserInfo: (container: HTMLElement | string) => {
         // 支持传入元素或元素 ID
         const targetContainer =
-          typeof container === 'string'
-            ? document.getElementById(container)
-            : container
+          typeof container === 'string' ? document.getElementById(container) : container
 
         if (!targetContainer) {
           console.warn('容器元素不存在:', container)
@@ -105,10 +96,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
         }
 
         // 清理旧的渲染实例
-        const containerKey =
-          typeof container === 'string'
-            ? container
-            : container.id || 'user-info'
+        const containerKey = typeof container === 'string' ? container : container.id || 'user-info'
         const oldRoot = userInfoRootRef.current.get(containerKey)
         if (oldRoot) {
           oldRoot.unmount()
@@ -127,7 +115,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
       },
       onMicroAppStateChange: (
         callback: (state: any, prev: any) => void,
-        fireImmediately?: boolean
+        fireImmediately?: boolean,
       ) => {
         return onMicroAppGlobalStateChange(callback, fireImmediately)
       },
@@ -138,7 +126,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
       appBasicInfo.key,
       userInfo?.id,
       currentMicroApp?.routeBasename,
-    ]
+    ],
   )
 
   // 只在应用配置变化时重新加载微应用
@@ -179,12 +167,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
     if (hashIndex !== -1) {
       entryUrl = entryUrl.substring(0, hashIndex)
       if (process.env.NODE_ENV === 'development') {
-        console.warn(
-          'entry 包含路由 hash，已自动移除:',
-          microAppEntry,
-          '->',
-          entryUrl
-        )
+        console.warn('entry 包含路由 hash，已自动移除:', microAppEntry, '->', entryUrl)
       }
     }
 
@@ -230,7 +213,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
             error: err,
           })
           message.error(
-            `"${microAppName}" 加载失败。请检查：1) 微应用是否正确导出生命周期函数；2) 微应用的 UMD 库名是否与配置的 name 一致；3) entry 路径是否正确`
+            `"${microAppName}" 加载失败。请检查：1) 微应用是否正确导出生命周期函数；2) 微应用的 UMD 库名是否与配置的 name 一致；3) entry 路径是否正确`,
           )
         }
       })
@@ -278,12 +261,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
       }
     }
     // 只依赖应用配置和 props 的核心字段
-  }, [
-    appBasicInfo.micro_app.name,
-    appBasicInfo.micro_app.entry,
-    appBasicInfo.key,
-    microAppProps,
-  ])
+  }, [appBasicInfo.micro_app.name, appBasicInfo.micro_app.entry, appBasicInfo.key, microAppProps])
 
   return (
     <>

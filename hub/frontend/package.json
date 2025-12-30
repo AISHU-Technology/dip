@@ -5,10 +5,16 @@
   "type": "module",
   "scripts": {
     "build": "rsbuild build",
-    "check": "biome check --write",
     "dev": "rsbuild dev --open",
-    "format": "biome format --write",
-    "preview": "rsbuild preview"
+    "preview": "rsbuild preview",
+    "check": "yarn biome check --write src/",
+    "check:dry": "yarn biome check src/",
+    "check:errors": "yarn biome check src/ 2>&1 | grep -v -i warning || true",
+    "check:styles": "yarn format:styles && yarn lint:styles",
+    "check:all": "yarn check && yarn check:styles",
+    "format": "yarn biome format --write src/",
+    "format:styles": "prettier --write \"src/**/*.{less,scss,sass}\"",
+    "lint:styles": "stylelint \"src/**/*.{less,scss,sass}\" --fix"
   },
   "dependencies": {
     "@ant-design/icons": "^6.1.0",
@@ -44,6 +50,9 @@
     "express": "^4.18.2",
     "postcss": "^8.5.6",
     "postinstall-postinstall": "^2.1.0",
+    "prettier": "^3.7.4",
+    "stylelint": "^16.26.1",
+    "stylelint-config-standard": "^39.0.1",
     "tailwindcss": "^3.4.0",
     "typescript": "^5.9.3"
   }
