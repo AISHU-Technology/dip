@@ -1,7 +1,7 @@
 import { create } from 'zustand'
+import { getLogoutUrl } from '@/apis/login'
 import type { UserInfo } from '@/apis/user'
 import { getUserInfo } from '@/apis/user'
-import { getLogoutUrl } from '@/apis/login'
 import { getAccessToken } from '@/utils/http/token-config'
 
 /**

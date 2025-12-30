@@ -1,14 +1,8 @@
-import { useMemo, memo } from 'react'
-import { Col, Card, Skeleton, Row } from 'antd'
+import { Card, Col, Row, Skeleton } from 'antd'
+import { memo, useMemo } from 'react'
 import { gap } from './utils'
 
-const getCount = ({
-  width,
-  cardWidth,
-}: {
-  width?: number
-  cardWidth?: number
-} = {}) => {
+const getCount = ({ width, cardWidth }: { width?: number; cardWidth?: number } = {}) => {
   let count = 4
   try {
     if (width && cardWidth) {
@@ -31,10 +25,7 @@ const SkeletonGrid = ({
   cardWidth?: number
   avatarShape?: 'square' | 'circle'
 }) => {
-  const count = useMemo(
-    () => getCount({ width, cardWidth }),
-    [width, cardWidth]
-  )
+  const count = useMemo(() => getCount({ width, cardWidth }), [width, cardWidth])
 
   return (
     <Row gutter={[gap, gap]}>
@@ -48,18 +39,9 @@ const SkeletonGrid = ({
             >
               <div className="p-1">
                 <div className="flex items-start mb-0.5">
-                  <Skeleton.Avatar
-                    active
-                    size={48}
-                    shape={avatarShape}
-                    className="mr-0.5"
-                  />
+                  <Skeleton.Avatar active size={48} shape={avatarShape} className="mr-0.5" />
                   <div className="flex-1 overflow-hidden">
-                    <Skeleton
-                      active
-                      paragraph={{ rows: 2 }}
-                      title={{ width: '80%' }}
-                    />
+                    <Skeleton active paragraph={{ rows: 2 }} title={{ width: '80%' }} />
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-0.5 mt-0.5">

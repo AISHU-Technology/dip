@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { Input } from 'antd'
 import type { InputProps } from 'antd'
+import { Input } from 'antd'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import IconFont from '@/components/IconFont'
 
 interface SearchInputProps extends Omit<InputProps, 'onChange' | 'value'> {
@@ -51,7 +51,7 @@ const SearchInput: React.FC<SearchInputProps> = ({
 
       debounceTimer.current = setTimeout(doSearch, debounceDelay)
     },
-    [clearDebounce, debounceDelay, onSearch]
+    [clearDebounce, debounceDelay, onSearch],
   )
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

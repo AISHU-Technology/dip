@@ -11,11 +11,7 @@ const axiosInstance = axios.create()
 axiosInstance.interceptors.response.use(
   (res) => res,
   async (err) => {
-    if (
-      httpConfig.refreshToken &&
-      err.response &&
-      err.response.status === 401
-    ) {
+    if (httpConfig.refreshToken && err.response && err.response.status === 401) {
       try {
         if (!isRefreshing) {
           isRefreshing = true
@@ -51,7 +47,7 @@ axiosInstance.interceptors.response.use(
                     ...(err.config.headers || {}),
                     Authorization: `Bearer ${token}`,
                   },
-                })
+                }),
               ),
           ]
         })
@@ -66,7 +62,7 @@ axiosInstance.interceptors.response.use(
     } else {
       throw err
     }
-  }
+  },
 )
 
 export default axiosInstance

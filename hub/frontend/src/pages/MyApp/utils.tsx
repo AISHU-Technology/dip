@@ -1,6 +1,6 @@
+import { PushpinOutlined } from '@ant-design/icons'
 import type { ApplicationInfo } from '@/apis/applications'
 import { usePreferenceStore } from '@/stores'
-import { PushpinOutlined } from '@ant-design/icons'
 
 /** 我的应用操作菜单项 */
 export const getMyAppMenuItems = (app: ApplicationInfo) => {

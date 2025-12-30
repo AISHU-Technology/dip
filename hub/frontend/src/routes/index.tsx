@@ -1,11 +1,11 @@
 import { lazy, useMemo } from 'react'
-import { createBrowserRouter, Navigate } from 'react-router-dom'
 import type { RouteObject } from 'react-router-dom'
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+import { BASE_PATH } from '@/utils/config'
+import { useUserInfoStore } from '../stores'
+import { ProtectedRoute } from './ProtectedRoute'
 import { routeConfigs } from './routes'
 import { getFirstVisibleSidebarRoute } from './utils'
-import { ProtectedRoute } from './ProtectedRoute'
-import { useUserInfoStore } from '../stores'
-import { BASE_PATH } from '@/utils/config'
 
 const Login = lazy(() => import('../pages/Login'))
 const LoginSuccess = lazy(() => import('../pages/Login/LoginSuccess'))
@@ -112,5 +112,5 @@ export const router = createBrowserRouter(
   ],
   {
     basename: BASE_PATH === '/' ? undefined : BASE_PATH,
-  }
+  },
 )

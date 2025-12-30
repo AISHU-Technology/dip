@@ -2,6 +2,7 @@ import { memo, useMemo } from 'react'
 import empty from '@/assets/images/abnormal/empty.svg'
 import loadFailed from '@/assets/images/abnormal/loadFailed.png'
 import searchEmpty from '@/assets/images/abnormal/searchEmpty.svg'
+
 /**
  * 空 样式组件
  * @interface IEmpty
@@ -9,10 +10,7 @@ import searchEmpty from '@/assets/images/abnormal/searchEmpty.svg'
  * @param {React.ReactElement} desc 描述文字
  */
 interface IEmpty
-  extends React.DetailedHTMLProps<
-    React.HTMLAttributes<HTMLDivElement>,
-    HTMLDivElement
-  > {
+  extends React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement> {
   iconSrc?: any
   iconHeight?: any
   desc?: React.ReactElement | string
@@ -44,11 +42,7 @@ const Empty: React.FC<IEmpty> = ({
 
   return (
     <div className="flex flex-col h-full w-full items-center justify-center gap-y-3">
-      <img
-        src={icon}
-        alt=""
-        style={{ height: iconHeight, maxHeight: iconHeight }}
-      />
+      <img src={icon} alt="" style={{ height: iconHeight, maxHeight: iconHeight }} />
       {desc && <div className="font-medium ">{desc}</div>}
       {subDesc && <div className="font-normal">{subDesc}</div>}
       {children}

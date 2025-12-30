@@ -6,9 +6,7 @@ const ServerError = () => {
     <div className="w-full h-full flex items-center justify-center">
       <Result
         subTitle={
-          <span className="text-base text-[--dip-text-color-65]">
-            服务器出错了，请稍后再试...
-          </span>
+          <span className="text-base text-[--dip-text-color-65]">服务器出错了，请稍后再试...</span>
         }
         // extra={
         //   <Button type="primary" onClick={() => navigate('/')}>

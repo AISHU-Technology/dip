@@ -45,10 +45,7 @@ export interface MicroAppGlobalState {
 /**
  * 状态变化监听器类型
  */
-type StateChangeListener = (
-  state: MicroAppGlobalState,
-  prev: MicroAppGlobalState
-) => void
+type StateChangeListener = (state: MicroAppGlobalState, prev: MicroAppGlobalState) => void
 
 /**
  * 全局状态存储
@@ -77,10 +74,7 @@ class MicroAppStateManager {
   /**
    * 设置全局状态
    */
-  setState(
-    patch: Partial<MicroAppGlobalState>,
-    options?: { allowAllFields?: boolean }
-  ): boolean {
+  setState(patch: Partial<MicroAppGlobalState>, options?: { allowAllFields?: boolean }): boolean {
     const prevState = { ...this.state }
 
     // 如果 allowAllFields 为 true（主应用调用），允许更新所有字段
@@ -121,7 +115,7 @@ class MicroAppStateManager {
           '[微应用全局状态] 以下字段被过滤（微应用无权修改）:',
           rejectedFields,
           '\n允许的字段:',
-          allowedFields
+          allowedFields,
         )
       }
 
@@ -163,10 +157,7 @@ class MicroAppStateManager {
    * 监听全局状态变化
    * 支持多个监听器同时监听，每个监听器独立管理
    */
-  onGlobalStateChange(
-    callback: StateChangeListener,
-    fireImmediately?: boolean
-  ): () => void {
+  onGlobalStateChange(callback: StateChangeListener, fireImmediately?: boolean): () => void {
     // 检查监听器数量限制
     if (this.listeners.size >= MicroAppStateManager.MAX_LISTENERS) {
       const errorMsg = `[微应用全局状态] 监听器数量已达上限（${MicroAppStateManager.MAX_LISTENERS}），请检查是否有内存泄漏`
@@ -184,9 +175,7 @@ class MicroAppStateManager {
 
     // 调试模式：记录监听器注册
     if (this.debug) {
-      console.log(
-        `[微应用全局状态] 注册监听器，当前监听器数量: ${this.listeners.size}`
-      )
+      console.log(`[微应用全局状态] 注册监听器，当前监听器数量: ${this.listeners.size}`)
     }
 
     // 如果 fireImmediately 为 true，立即触发一次
@@ -199,9 +188,7 @@ class MicroAppStateManager {
     return () => {
       this.listeners.delete(callback)
       if (this.debug) {
-        console.log(
-          `[微应用全局状态] 移除监听器，当前监听器数量: ${this.listeners.size}`
-        )
+        console.log(`[微应用全局状态] 移除监听器，当前监听器数量: ${this.listeners.size}`)
       }
     }
   }
@@ -217,19 +204,14 @@ class MicroAppStateManager {
   /**
    * 通知所有监听器状态变化
    */
-  private notifyListeners(
-    state: MicroAppGlobalState,
-    prev: MicroAppGlobalState
-  ): void {
+  private notifyListeners(state: MicroAppGlobalState, prev: MicroAppGlobalState): void {
     // 调试模式：记录通知信息
     if (this.debug) {
-      const changedFields = Object.keys(state).filter(
-        (key) => state[key] !== prev[key]
-      )
+      const changedFields = Object.keys(state).filter((key) => state[key] !== prev[key])
       if (changedFields.length > 0) {
         console.log(
           `[微应用全局状态] 通知 ${this.listeners.size} 个监听器，变化字段:`,
-          changedFields
+          changedFields,
         )
       }
     }
@@ -242,7 +224,7 @@ class MicroAppStateManager {
           `[微应用全局状态] 监听器 ${index} 执行出错:`,
           error,
           '\n监听器函数:',
-          listener
+          listener,
         )
       }
     })
@@ -266,10 +248,7 @@ function getInitialState(): MicroAppGlobalState {
     }
   } catch (error) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(
-        '[微应用全局状态] 无法从 languageStore 获取语言，使用默认值 zh-CN:',
-        error
-      )
+      console.warn('[微应用全局状态] 无法从 languageStore 获取语言，使用默认值 zh-CN:', error)
     }
   }
 
@@ -292,7 +271,7 @@ const stateManager = new MicroAppStateManager(getInitialState())
  */
 export const setMicroAppGlobalState = (
   patch: Partial<MicroAppGlobalState>,
-  options?: { allowAllFields?: boolean }
+  options?: { allowAllFields?: boolean },
 ): boolean => {
   return stateManager.setState(patch, options)
 }
@@ -302,7 +281,7 @@ export const setMicroAppGlobalState = (
  */
 export const onMicroAppGlobalStateChange = (
   callback: (state: MicroAppGlobalState, prev: MicroAppGlobalState) => void,
-  fireImmediately?: boolean
+  fireImmediately?: boolean,
 ): (() => void) => {
   return stateManager.onGlobalStateChange(callback, fireImmediately)
 }

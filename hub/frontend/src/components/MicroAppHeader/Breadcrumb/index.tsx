@@ -1,7 +1,7 @@
-import type { BreadcrumbItem } from '@/utils/micro-app/globalState'
+import { Button } from 'antd'
 import type { ReactNode } from 'react'
 import HomeIcon from '@/assets/images/header/home.svg?react'
-import { Button } from 'antd'
+import type { BreadcrumbItem } from '@/utils/micro-app/globalState'
 
 interface BreadcrumbProps {
   items?: BreadcrumbItem[]
@@ -37,10 +37,7 @@ export const Breadcrumb = ({ items = [], onNavigate }: BreadcrumbProps) => {
   }
 
   // 所有面包屑项（包含首页）
-  const allItems: Array<BreadcrumbItem> = [
-    { key: 'main-home', name: '', path: '/' },
-    ...items,
-  ]
+  const allItems: Array<BreadcrumbItem> = [{ key: 'main-home', name: '', path: '/' }, ...items]
 
   return (
     <div className="h-6 flex items-center" aria-label="面包屑导航">
@@ -62,11 +59,7 @@ export const Breadcrumb = ({ items = [], onNavigate }: BreadcrumbProps) => {
             ) : (
               <>
                 {/* 分隔符 */}
-                {index > 0 && (
-                  <span className="text-sm font-medium text-black/25 mx-2">
-                    /
-                  </span>
-                )}
+                {index > 0 && <span className="text-sm font-medium text-black/25 mx-2">/</span>}
                 {/* 面包屑项 */}
                 {isLast ? (
                   <Button
@@ -78,11 +71,7 @@ export const Breadcrumb = ({ items = [], onNavigate }: BreadcrumbProps) => {
                     {item.name}
                   </Button>
                 ) : (
-                  <Button
-                    size="small"
-                    type="text"
-                    onClick={(e) => handleNavigate(item, e)}
-                  >
+                  <Button size="small" type="text" onClick={(e) => handleNavigate(item, e)}>
                     {isRootItem && renderIcon(item.icon)}
                     {item.name}
                   </Button>

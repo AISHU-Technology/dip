@@ -1,7 +1,6 @@
 import type { ApplicationInfo } from '@/apis/applications'
-import { ModeEnum } from './types'
 import { getAppStoreMenuItems } from '@/pages/AppStore/utils'
-import { getMyAppMenuItems } from '@/pages/MyApp/utils'
+import { ModeEnum } from './types'
 
 // 卡片的最小宽度
 export const minCardWidth = 380
@@ -29,7 +28,7 @@ export const computeColumnCount = (
   { minWidth, maxWidth }: { minWidth: number; maxWidth: number } = {
     minWidth: minCardWidth,
     maxWidth: maxCardWidth,
-  }
+  },
 ): number => {
   let count = 1
 

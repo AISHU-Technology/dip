@@ -5,4 +5,3 @@ export interface RefreshTokenResponse {
   /** Access Token */
   access_token: string
 }
-

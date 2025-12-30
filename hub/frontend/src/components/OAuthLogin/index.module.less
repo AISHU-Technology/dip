@@ -1,18 +1,12 @@
 .container {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   overflow: auto;
   background: #f9f9f9;
 
   .background-container {
     position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
+    inset: 0;
     background-position: center center;
     background-repeat: no-repeat;
     background-size: cover;
@@ -27,8 +21,8 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    box-shadow: 2px 3px 16px 3px rgba(0, 0, 0, 0.18);
-    background: #ffffff;
+    box-shadow: 2px 3px 16px 3px rgb(0 0 0 / 18%);
+    background: #fff;
     border: none;
     border-radius: 8px;
 
@@ -77,4 +71,3 @@
     }
   }
 }
-

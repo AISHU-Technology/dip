@@ -8,9 +8,10 @@ body {
 
 body {
   line-height: 1;
-  color: rgba(0, 0, 0, 0.85);
-  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue',
-    'PingFang SC', 'Microsoft YaHei', 'sans-serif';
+  color: rgb(0 0 0 / 85%);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
 }
 
 #root {
@@ -24,7 +25,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(178, 181, 189, 0.5);
+  background: rgb(178 181 189 / 50%);
   border-radius: 4px;
 }
 
@@ -34,5 +35,5 @@ body {
 
 ::-webkit-scrollbar-thumb:hover,
 ::-webkit-scrollbar-thumb:active {
-  background: rgba(178, 181, 189);
+  background: rgb(178 181 189);
 }

@@ -1,11 +1,11 @@
-import { useState, useMemo, useCallback, memo, useEffect } from 'react'
-import { Row, Col, Tabs } from 'antd'
+import { Col, Row, Tabs } from 'antd'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import AutoSizer from 'react-virtualized-auto-sizer'
-import { computeColumnCount, gap } from './utils'
-import AppCard from './AppCard'
 import type { ApplicationInfo } from '@/apis/applications'
-import { ModeEnum, ALL_TAB_KEY } from './types'
+import AppCard from './AppCard'
 import styles from './index.module.less'
+import { ALL_TAB_KEY, ModeEnum } from './types'
+import { computeColumnCount, gap } from './utils'
 
 interface AppListProps {
   mode: ModeEnum.MyApp | ModeEnum.AppStore
@@ -81,15 +81,11 @@ const AppList: React.FC<AppListProps> = ({ mode, apps, onMenuClick }) => {
     (app: ApplicationInfo, width: number) => {
       return (
         <Col key={app.key} style={{ width, minWidth: width }}>
-          <AppCard
-            app={app}
-            mode={mode}
-            onMenuClick={(key) => onMenuClick?.(key, app)}
-          />
+          <AppCard app={app} mode={mode} onMenuClick={(key) => onMenuClick?.(key, app)} />
         </Col>
       )
     },
-    [mode, onMenuClick]
+    [mode, onMenuClick],
   )
 
   return (
@@ -120,9 +116,7 @@ const AppList: React.FC<AppListProps> = ({ mode, apps, onMenuClick }) => {
 
             return (
               <Row gutter={[gap, gap]}>
-                {currentApps.map((app) =>
-                  renderAppCard(app, calculatedCardWidth)
-                )}
+                {currentApps.map((app) => renderAppCard(app, calculatedCardWidth))}
               </Row>
             )
           }}

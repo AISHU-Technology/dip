@@ -1,16 +1,16 @@
-import { useCallback, memo, useState, useEffect } from 'react'
-import { Spin, Button, message } from 'antd'
-import GradientContainer from '@/components/GradientContainer'
-import AppList from '@/components/AppList'
-import Empty from '@/components/Empty'
-import { ModeEnum } from '@/components/AppList/types'
-import { MyAppActionEnum } from './types'
-import SearchInput from '@/components/SearchInput'
-import { type ApplicationInfo } from '@/apis/applications'
 import { ReloadOutlined } from '@ant-design/icons'
-import { usePreferenceStore } from '@/stores'
+import { Button, message, Spin } from 'antd'
+import { memo, useCallback, useEffect, useState } from 'react'
+import type { ApplicationInfo } from '@/apis/applications'
+import AppList from '@/components/AppList'
+import { ModeEnum } from '@/components/AppList/types'
+import Empty from '@/components/Empty'
+import GradientContainer from '@/components/GradientContainer'
+import SearchInput from '@/components/SearchInput'
 import { useApplicationsService } from '@/hooks/useApplicationsService'
+import { usePreferenceStore } from '@/stores'
 import { getFullPath } from '@/utils/config'
+import { MyAppActionEnum } from './types'
 
 const MyApp = () => {
   const { apps, loading, error, searchValue, handleSearch, handleRefresh } =
@@ -51,7 +51,7 @@ const MyApp = () => {
         message.error('操作失败')
       }
     },
-    [handleRefresh, togglePin]
+    [handleRefresh, togglePin],
   )
 
   /** 渲染状态内容（loading/error/empty） */
@@ -90,20 +90,10 @@ const MyApp = () => {
     const stateContent = renderStateContent()
 
     if (stateContent) {
-      return (
-        <div className="absolute inset-0 flex items-center justify-center">
-          {stateContent}
-        </div>
-      )
+      return <div className="absolute inset-0 flex items-center justify-center">{stateContent}</div>
     }
 
-    return (
-      <AppList
-        mode={ModeEnum.MyApp}
-        apps={apps}
-        onMenuClick={handleMenuClick}
-      />
-    )
+    return <AppList mode={ModeEnum.MyApp} apps={apps} onMenuClick={handleMenuClick} />
   }
 
   return (
@@ -111,18 +101,12 @@ const MyApp = () => {
       <div className="flex justify-between mb-4 flex-shrink-0 z-20">
         <div className="flex flex-col gap-y-3">
           <span className="text-[32px] font-bold">探索企业级 AI 应用</span>
-          <span className="text-base">
-            查找具备专业能力的应用，帮你解决业务上的复杂问题
-          </span>
+          <span className="text-base">查找具备专业能力的应用，帮你解决业务上的复杂问题</span>
         </div>
         {hasLoadedData && (
           <div className="flex items-center gap-x-2">
             <SearchInput onSearch={handleSearch} placeholder="搜索应用" />
-            <Button
-              type="text"
-              icon={<ReloadOutlined />}
-              onClick={handleRefresh}
-            />
+            <Button type="text" icon={<ReloadOutlined />} onClick={handleRefresh} />
           </div>
         )}
       </div>

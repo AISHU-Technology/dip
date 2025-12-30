@@ -1,4 +1,4 @@
-import { useRef, memo, useEffect } from 'react'
+import { memo, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { getLoginUrl } from '@/apis/login'
 

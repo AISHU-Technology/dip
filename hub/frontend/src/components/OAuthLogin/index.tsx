@@ -1,14 +1,14 @@
-import { useEffect, useState } from 'react'
 import classNames from 'classnames'
+import { useEffect, useState } from 'react'
 import { getIframeSizeApi } from '@/apis/config'
-import { useOEMConfigStore } from '@/stores/oemConfigStore'
-import { useLanguageStore } from '@/stores/languageStore'
-import styles from './index.module.less'
 import backgroundImage from '@/assets/images/logoBackground.png'
-import Header from './Header'
+import { useLanguageStore } from '@/stores/languageStore'
+import { useOEMConfigStore } from '@/stores/oemConfigStore'
+import About from './About'
 import Content from './Content'
 import Footer from './Footer'
-import About from './About'
+import Header from './Header'
+import styles from './index.module.less'
 
 function OAuthLogin() {
   const { language } = useLanguageStore()
@@ -58,8 +58,7 @@ function OAuthLogin() {
   const backgroundImageUrl = getBackgroundImageUrl()
 
   // 计算登录框高度，如果 iframe 高度大于 435，则调整容器高度
-  const loginHeight =
-    iframeHeight > 435 ? `${560 + iframeHeight - 435}px` : '560px'
+  const loginHeight = iframeHeight > 435 ? `${560 + iframeHeight - 435}px` : '560px'
 
   return (
     <div className={classNames(styles.container)}>

@@ -1,5 +1,5 @@
-import type { RouteConfig } from './types'
 import { routeConfigs } from './routes'
+import type { RouteConfig } from './types'
 
 /**
  * 根据路径获取路由配置
@@ -39,10 +39,7 @@ export const getRouteByKey = (key: string): RouteConfig | undefined => {
  * 判断路由是否对用户可见
  * TODO: 当前没有角色系统，所有路由都允许访问，直接返回 true
  */
-export const isRouteVisibleForRoles = (
-  route: RouteConfig,
-  roleIds: Set<string>
-): boolean => {
+export const isRouteVisibleForRoles = (route: RouteConfig, roleIds: Set<string>): boolean => {
   // 当前没有角色系统，所有路由都允许访问
   return true
   // 以下代码为角色系统的实现（暂时禁用）
@@ -52,10 +49,6 @@ export const isRouteVisibleForRoles = (
   // return required.some((id) => roleIds.has(id))
 }
 
-export const getFirstVisibleSidebarRoute = (
-  roleIds: Set<string>
-): RouteConfig | undefined => {
-  return routeConfigs.find(
-    (r) => r.showInSidebar && r.key && isRouteVisibleForRoles(r, roleIds)
-  )
+export const getFirstVisibleSidebarRoute = (roleIds: Set<string>): RouteConfig | undefined => {
+  return routeConfigs.find((r) => r.showInSidebar && r.key && isRouteVisibleForRoles(r, roleIds))
 }

@@ -1,12 +1,9 @@
-import {
-  type EventSourceMessage,
-  fetchEventSource,
-} from '@microsoft/fetch-event-source'
-import { isJSONString } from '@/utils/handle-function'
+import { type EventSourceMessage, fetchEventSource } from '@microsoft/fetch-event-source'
 import _ from 'lodash'
-import { IncrementalActionEnum } from './types'
-import { httpConfig } from './token-config'
+import { isJSONString } from '@/utils/handle-function'
 import { useLanguageStore } from '../../stores/languageStore'
+import { httpConfig } from './token-config'
+import { IncrementalActionEnum } from './types'
 export type StreamingOutServerType = {
   url: string // 请求的URL
   method?: 'POST' | 'GET' // 请求方式 默认post方式
@@ -33,18 +30,8 @@ const getStreamingOutHttpHeaders = () => {
 }
 
 /** 流式http请求 （所有流式请求统一使用这个发起） */
-export const streamingOutHttp = (
-  param: StreamingOutServerType
-): AbortController => {
-  const {
-    url,
-    body,
-    method = 'POST',
-    onMessage,
-    onError,
-    onClose,
-    onOpen,
-  } = param
+export const streamingOutHttp = (param: StreamingOutServerType): AbortController => {
+  const { url, body, method = 'POST', onMessage, onError, onClose, onOpen } = param
   const controller = new AbortController()
   const signal = controller.signal
   let errorInfo = {}
@@ -137,7 +124,7 @@ export function processIncrementalUpdate(
     content: any
     action: IncrementalActionEnum
   },
-  originalData: object | string
+  originalData: object | string,
 ): object | string {
   // 处理根路径操作
   if (pathKeys.length === 0) {
@@ -145,9 +132,7 @@ export function processIncrementalUpdate(
       case IncrementalActionEnum.Upsert:
         return newContent
       case IncrementalActionEnum.Append:
-        return typeof originalData === 'string'
-          ? originalData + newContent
-          : originalData
+        return typeof originalData === 'string' ? originalData + newContent : originalData
       default:
         return originalData
     }
@@ -162,9 +147,7 @@ export function processIncrementalUpdate(
     case IncrementalActionEnum.Append: {
       const existingValue = _.get(originalData, pathKeys)
       const updatedValue =
-        typeof existingValue === 'string'
-          ? existingValue + newContent
-          : newContent
+        typeof existingValue === 'string' ? existingValue + newContent : newContent
       _.set(originalData as object, pathKeys, updatedValue)
       return originalData
     }
@@ -172,8 +155,7 @@ export function processIncrementalUpdate(
     case IncrementalActionEnum.Remove: {
       const parentPath = pathKeys.slice(0, -1)
       const lastKey = pathKeys[pathKeys.length - 1]
-      const parent =
-        parentPath.length > 0 ? _.get(originalData, parentPath) : originalData
+      const parent = parentPath.length > 0 ? _.get(originalData, parentPath) : originalData
 
       if (Array.isArray(parent)) {
         // 刪除元素 要保留元素在數組中的位置

@@ -2,7 +2,7 @@ import { get } from '@/utils/http'
 import type { UserInfo } from './index.d'
 
 // 导出类型定义
-export type { UserInfo, RoleInfo } from './index.d'
+export type { RoleInfo, UserInfo } from './index.d'
 
 /**
  * 获取用户信息接口

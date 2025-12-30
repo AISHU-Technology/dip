@@ -1,13 +1,13 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Layout } from 'antd'
-import { useNavigate, useLocation } from 'react-router-dom'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useMicroAppStore } from '@/stores'
+import type { BreadcrumbItem } from '@/utils/micro-app/globalState'
 import {
+  type MicroAppGlobalState,
   onMicroAppGlobalStateChange,
   setMicroAppGlobalState,
-  type MicroAppGlobalState,
 } from '@/utils/micro-app/globalState'
-import type { BreadcrumbItem } from '@/utils/micro-app/globalState'
 import { AppMenu } from './AppMenu'
 import { Breadcrumb } from './Breadcrumb'
 import { CopilotButton } from './CopilotButton'
@@ -27,9 +27,7 @@ const MicroAppHeader = () => {
 
   const { currentMicroApp } = useMicroAppStore()
 
-  const [microAppBreadcrumb, setMicroAppBreadcrumb] = useState<
-    BreadcrumbItem[]
-  >([])
+  const [microAppBreadcrumb, setMicroAppBreadcrumb] = useState<BreadcrumbItem[]>([])
 
   const isMicroAppRoute = location.pathname.startsWith('/application/')
 
@@ -40,14 +38,11 @@ const MicroAppHeader = () => {
       return
     }
 
-    const unsubscribe = onMicroAppGlobalStateChange(
-      (state: MicroAppGlobalState) => {
-        if (state.breadcrumb) {
-          setMicroAppBreadcrumb(state.breadcrumb)
-        }
-      },
-      true
-    )
+    const unsubscribe = onMicroAppGlobalStateChange((state: MicroAppGlobalState) => {
+      if (state.breadcrumb) {
+        setMicroAppBreadcrumb(state.breadcrumb)
+      }
+    }, true)
 
     return () => {
       unsubscribe()
@@ -116,7 +111,7 @@ const MicroAppHeader = () => {
       if (!item.path) return
       navigate(item.path)
     },
-    [navigate]
+    [navigate],
   )
 
   // Copilot 按钮点击：通过全局状态通知微应用
@@ -130,7 +125,7 @@ const MicroAppHeader = () => {
           clickedAt: Date.now(),
         },
       },
-      { allowAllFields: true }
+      { allowAllFields: true },
     )
   }, [])
 
@@ -139,17 +134,12 @@ const MicroAppHeader = () => {
       {/* 左侧：应用菜单和面包屑 */}
       <div className="flex items-center gap-x-4">
         <AppMenu />
-        <Breadcrumb
-          items={breadcrumbItems}
-          onNavigate={handleBreadcrumbNavigate}
-        />
+        <Breadcrumb items={breadcrumbItems} onNavigate={handleBreadcrumbNavigate} />
       </div>
 
       {/* 右侧：Copilot 按钮和用户信息 */}
       <div className="flex items-center gap-x-4">
-        {isMicroAppRoute && currentMicroApp && (
-          <CopilotButton onClick={handleCopilotClick} />
-        )}
+        {isMicroAppRoute && currentMicroApp && <CopilotButton onClick={handleCopilotClick} />}
         <UserInfo />
       </div>
     </AntHeader>

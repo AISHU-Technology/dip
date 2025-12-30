@@ -1,6 +1,6 @@
+import { message } from 'antd'
 import intl from 'react-intl-universal'
 import { httpConfig } from './token-config'
-import { message } from 'antd'
 
 export async function handleError({
   error,

@@ -1,26 +1,22 @@
-import { useState, useMemo, useCallback } from 'react'
-import { Layout, Avatar, message, Tooltip } from 'antd'
-import { useNavigate, useLocation } from 'react-router-dom'
-import { usePreferenceStore } from '@/stores'
-import { useOEMConfigStore } from '@/stores/oemConfigStore'
-import { useLanguageStore } from '@/stores/languageStore'
-import {
-  getFirstVisibleSidebarRoute,
-  getRouteByPath,
-  isRouteVisibleForRoles,
-} from '@/routes/utils'
-import { routeConfigs } from '@/routes/routes'
-import type { ApplicationInfo } from '@/apis/applications'
 import type { MenuProps } from 'antd'
+import { Avatar, Layout, message, Tooltip } from 'antd'
 import clsx from 'classnames'
-import { getFullPath } from '@/utils/config'
+import { useCallback, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import type { ApplicationInfo } from '@/apis/applications'
 import LogoIcon from '@/assets/images/brand/logo.svg?react'
-import SidebarSystemIcon from '@/assets/images/sider/proton.svg?react'
 import SidebarAiDataPlatformIcon from '@/assets/images/sider/adp.svg?react'
+import SidebarSystemIcon from '@/assets/images/sider/proton.svg?react'
+import { routeConfigs } from '@/routes/routes'
+import { getFirstVisibleSidebarRoute, getRouteByPath, isRouteVisibleForRoles } from '@/routes/utils'
+import { usePreferenceStore } from '@/stores'
+import { useLanguageStore } from '@/stores/languageStore'
+import { useOEMConfigStore } from '@/stores/oemConfigStore'
+import { getFullPath } from '@/utils/config'
+import IconFont from '../IconFont'
 import { BottomLinkItem } from './BottomLinkItem'
 import { SiderMenuItem } from './SiderMenuItem'
 import { UserMenuItem } from './UserMenuItem'
-import IconFont from '../IconFont'
 
 const { Sider: AntdSider } = Layout
 
@@ -45,10 +41,7 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
   const [microApps] = useState<ApplicationInfo[]>([])
   // TODO: 角色信息需要从其他地方获取，暂时使用空数组
   const roleIds = useMemo(() => new Set<string>([]), [])
-  const firstVisibleRoute = useMemo(
-    () => getFirstVisibleSidebarRoute(roleIds),
-    [roleIds]
-  )
+  const firstVisibleRoute = useMemo(() => getFirstVisibleSidebarRoute(roleIds), [roleIds])
 
   // 根据当前路由确定选中的菜单项
   const getSelectedKey = () => {
@@ -103,7 +96,7 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
         message.error('取消钉住失败，请稍后重试')
       }
     },
-    [unpinMicroApp]
+    [unpinMicroApp],
   )
 
   const openExternal = useCallback((url: string) => {
@@ -184,14 +177,7 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
     ]
 
     return { myAppItem, pinnedItems, appStoreItem, externalItems }
-  }, [
-    pinnedMicroApps,
-    microApps,
-    handleOpenApp,
-    handleUnpin,
-    openExternal,
-    roleIds,
-  ])
+  }, [pinnedMicroApps, microApps, handleOpenApp, handleUnpin, openExternal, roleIds])
 
   const siderWidth = collapsed ? 60 : 240
   const selectedKey = getSelectedKey()
@@ -232,24 +218,18 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
         <div
           className={clsx(
             'flex items-center gap-2 pb-4',
-            collapsed
-              ? 'justify-center pl-1.5 pr-1.5'
-              : 'justify-between pl-3 pr-2'
+            collapsed ? 'justify-center pl-1.5 pr-1.5' : 'justify-between pl-3 pr-2',
           )}
         >
           {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt="logo"
-              className={clsx('h-6 w-auto', collapsed && 'hidden')}
-            />
+            <img src={logoUrl} alt="logo" className={clsx('h-6 w-auto', collapsed && 'hidden')} />
           ) : (
             <LogoIcon className={clsx('h-6 w-auto', collapsed && 'hidden')} />
           )}
           <Tooltip title={collapsed ? '展开' : '收起'} placement="right">
             <span
               className={clsx(
-                'text-sm cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-[--dip-text-color] hover:text-[--dip-primary-color]'
+                'text-sm cursor-pointer flex items-center justify-center w-8 h-8 rounded-md text-[--dip-text-color] hover:text-[--dip-primary-color]',
               )}
               onClick={() => onCollapse(!collapsed)}
             >
@@ -302,13 +282,7 @@ const Sider = ({ collapsed, onCollapse, topOffset = 0 }: SiderProps) => {
         {/* AI Data Platform + 系统工作台 */}
         <div className="flex flex-col gap-0">
           {sidebarData.externalItems.map((item) => {
-            return (
-              <BottomLinkItem
-                item={item}
-                collapsed={collapsed}
-                onClick={item.onClick}
-              />
-            )
+            return <BottomLinkItem item={item} collapsed={collapsed} onClick={item.onClick} />
           })}
         </div>
 

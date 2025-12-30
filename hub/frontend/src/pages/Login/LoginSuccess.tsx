@@ -1,8 +1,8 @@
+import { Spin } from 'antd'
 import { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Spin } from 'antd'
-import { useUserInfoStore } from '@/stores'
 import { getFirstVisibleSidebarRoute } from '@/routes/utils'
+import { useUserInfoStore } from '@/stores'
 
 const LoginSuccess = () => {
   const navigate = useNavigate()

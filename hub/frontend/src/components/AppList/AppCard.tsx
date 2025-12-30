@@ -1,12 +1,13 @@
-import React, { useMemo, useState } from 'react'
-import { Card, Dropdown, Avatar, Button } from 'antd'
 import type { MenuProps } from 'antd'
-import { formatTimeMinute } from '@/utils/handle-function/FormatTime'
+import { Avatar, Button, Card, Dropdown } from 'antd'
+import classNames from 'classnames'
+import type React from 'react'
+import { useMemo, useState } from 'react'
 import type { ApplicationInfo } from '@/apis/applications'
+import { formatTimeMinute } from '@/utils/handle-function/FormatTime'
+import IconFont from '../IconFont'
 import { ModeEnum } from './types'
 import { cardHeight, getAppCardMenuItems } from './utils'
-import IconFont from '../IconFont'
-import classNames from 'classnames'
 
 interface AppCardProps {
   app: ApplicationInfo
@@ -25,9 +26,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, onMenuClick }) => {
     onMenuClick?.(key as string, app)
   }
 
-  const updateTime = app.updated_at
-    ? formatTimeMinute(new Date(app.updated_at).getTime())
-    : ''
+  const updateTime = app.updated_at ? formatTimeMinute(new Date(app.updated_at).getTime()) : ''
   const userName = app.updated_by || ''
 
   return (
@@ -53,19 +52,14 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, onMenuClick }) => {
               className="w-full h-full rounded-full object-cover"
             />
           ) : (
-            <span className="text-white text-base font-medium">
-              {app.name?.charAt(0)}
-            </span>
+            <span className="text-white text-base font-medium">{app.name?.charAt(0)}</span>
           )}
         </div>
         {/* 名称 + 版本号 + 描述 */}
         <div className="flex-1 min-w-0">
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <div
-                className="text-sm font-medium mr-px truncate text-black"
-                title={app.name}
-              >
+              <div className="text-sm font-medium mr-px truncate text-black" title={app.name}>
                 {app.name}
               </div>
               {mode === ModeEnum.MyApp && (
@@ -78,11 +72,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, onMenuClick }) => {
                   }}
                 >
                   <span className="text-xs">立即使用</span>
-                  <IconFont
-                    type="icon-dip-arrow-up"
-                    rotate={90}
-                    className="text-xs"
-                  />
+                  <IconFont type="icon-dip-arrow-up" rotate={90} className="text-xs" />
                 </Button>
               )}
             </div>
@@ -91,10 +81,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, onMenuClick }) => {
                 {app.version}
               </div>
             )}
-            <p
-              className="text-xs line-clamp-2 text-[--dip-text-color]"
-              title={app.description}
-            >
+            <p className="text-xs line-clamp-2 text-[--dip-text-color]" title={app.description}>
               {app.description || '[暂无描述]'}
             </p>
           </div>
@@ -124,7 +111,8 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, onMenuClick }) => {
                 setMenuOpen(open)
               }}
             >
-              <span
+              <button
+                type="button"
                 onClick={(e) => {
                   e.stopPropagation()
                 }}
@@ -132,11 +120,11 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, onMenuClick }) => {
                   'w-6 h-6 flex items-center justify-center cursor-pointer rounded text-[var(--dip-text-color-45)] hover:text-[var(--dip-text-color-85)] hover:bg-[--dip-hover-bg-color] transition-opacity',
                   menuOpen
                     ? 'opacity-100 visible'
-                    : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible'
+                    : 'opacity-0 invisible group-hover:opacity-100 group-hover:visible',
                 )}
               >
                 <IconFont type="icon-dip-gengduo" />
-              </span>
+              </button>
             </Dropdown>
           )}
         </div>
