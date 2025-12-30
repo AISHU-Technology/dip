@@ -27,7 +27,7 @@ class OntologyConfigItemResponse(BaseModel):
     """
     业务知识网络配置项响应模型。
     """
-    id: int = Field(..., description="业务知识网络 ID")
+    id: str = Field(..., description="业务知识网络 ID")
     is_config: bool = Field(False, description="是否已配置")
 
 
@@ -35,7 +35,7 @@ class AgentConfigItemResponse(BaseModel):
     """
     智能体配置项响应模型。
     """
-    id: int = Field(..., description="智能体 ID")
+    id: str = Field(..., description="智能体 ID")
     is_config: bool = Field(False, description="是否已配置")
 
 

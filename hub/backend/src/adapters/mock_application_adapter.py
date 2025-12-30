@@ -49,11 +49,11 @@ class MockApplicationAdapter(ApplicationPort):
                 ),
                 release_config=["itops-analysis-release"],
                 ontology_config=[
-                    OntologyConfigItem(id=1, is_config=True),
-                    OntologyConfigItem(id=2, is_config=True),
+                    OntologyConfigItem(id="1", is_config=True),
+                    OntologyConfigItem(id="2", is_config=True),
                 ],
                 agent_config=[
-                    AgentConfigItem(id=1, is_config=True),
+                    AgentConfigItem(id="1", is_config=True),
                 ],
                 is_config=True,
                 updated_by="system",

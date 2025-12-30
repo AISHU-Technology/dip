@@ -79,9 +79,9 @@ components:
           items:
             $ref: '#/components/schemas/OntologyConfigItem'
           example:
-            - id: 201
+            - id: "201"
               is_config: true
-            - id: 202
+            - id: "202"
               is_config: false
         agent_config:
           type: array
@@ -90,9 +90,9 @@ components:
           items:
             $ref: '#/components/schemas/AgentConfigItem'
           example:
-            - id: 201
+            - id: "201"
               is_config: true
-            - id: 202
+            - id: "202"
               is_config: false
         is_config:
           type: boolean
@@ -129,12 +129,12 @@ components:
           headless: false
         release_config: ['app-release-1']
         ontology_config:
-          - id: 201
+          - id: "201"
             is_config: true
-          - id: 202
+          - id: "202"
             is_config: false
         agent_config:
-          - id: 201
+          - id: "201"
             is_config: true
         is_config: true
         updated_by: 'user-uuid-1234'
@@ -200,7 +200,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           title: 业务知识网络 ID
         is_config:
           type: boolean
@@ -214,7 +214,7 @@ components:
       type: object
       properties:
         id:
-          type: integer
+          type: string
           title: 智能体 ID
         is_config:
           type: boolean

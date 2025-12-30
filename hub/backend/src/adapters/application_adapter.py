@@ -135,20 +135,20 @@ class ApplicationAdapter(ApplicationPort):
                 if isinstance(item, dict):
                     if config_type == 'ontology':
                         result.append(OntologyConfigItem(
-                            id=item.get("id", 0),
+                            id=str(item.get("id", "")),
                             is_config=item.get("is_config", False),
                         ))
                     elif config_type == 'agent':
                         result.append(AgentConfigItem(
-                            id=item.get("id", 0),
+                            id=str(item.get("id", "")),
                             is_config=item.get("is_config", False),
                         ))
-                # 兼容旧格式：如果是整数，转换为配置项
-                elif isinstance(item, int):
+                # 兼容旧格式：如果是整数或字符串，转换为配置项
+                elif isinstance(item, (int, str)):
                     if config_type == 'ontology':
-                        result.append(OntologyConfigItem(id=item, is_config=False))
+                        result.append(OntologyConfigItem(id=str(item), is_config=False))
                     elif config_type == 'agent':
-                        result.append(AgentConfigItem(id=item, is_config=False))
+                        result.append(AgentConfigItem(id=str(item), is_config=False))
             return result
         except (json.JSONDecodeError, TypeError) as e:
             logger.warning(f"配置列表 JSON 解析失败: {json_str}, 错误: {e}")

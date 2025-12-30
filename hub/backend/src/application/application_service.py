@@ -151,17 +151,17 @@ class ApplicationService:
                 if self._ontology_manager_port:
                     # 调用外部接口查询业务知识网络详情（返回原始数据）
                     kn_data = await self._ontology_manager_port.get_knowledge_network(
-                        str(config_item.id),
+                        config_item.id,
                         auth_token=auth_token,
                     )
                     ontologies.append(kn_data)
                 else:
                     # 如果没有外部服务端口，返回基本信息
-                    ontologies.append({"id": str(config_item.id)})
+                    ontologies.append({"id": config_item.id})
             except Exception as e:
                 logger.warning(f"获取业务知识网络详情失败 (ID: {config_item.id}): {e}")
                 # 即使查询失败，也返回基本信息
-                ontologies.append({"id": str(config_item.id)})
+                ontologies.append({"id": config_item.id})
         
         return ontologies
 
@@ -198,17 +198,17 @@ class ApplicationService:
                 if self._agent_factory_port:
                     # 调用外部接口查询智能体详情（返回原始数据）
                     agent_data = await self._agent_factory_port.get_agent(
-                        str(config_item.id),
+                        config_item.id,
                         auth_token=auth_token,
                     )
                     agents.append(agent_data)
                 else:
                     # 如果没有外部服务端口，返回基本信息
-                    agents.append({"id": str(config_item.id)})
+                    agents.append({"id": config_item.id})
             except Exception as e:
                 logger.warning(f"获取智能体详情失败 (ID: {config_item.id}): {e}")
                 # 即使查询失败，也返回基本信息
-                agents.append({"id": str(config_item.id)})
+                agents.append({"id": config_item.id})
         
         return agents
 
@@ -420,7 +420,7 @@ class ApplicationService:
                                 )
                                 if onto_id:
                                     ontology_config.append(OntologyConfigItem(
-                                        id=int(onto_id),
+                                        id=str(onto_id),
                                         is_config=False,  # 安装时默认为未配置
                                     ))
                                     logger.info(f"成功导入业务知识网络: {onto_id}")
@@ -449,7 +449,7 @@ class ApplicationService:
                                 )
                                 if agent_result.id:
                                     agent_config.append(AgentConfigItem(
-                                        id=int(agent_result.id),
+                                        id=str(agent_result.id),
                                         is_config=False,  # 安装时默认为未配置
                                     ))
                                     logger.info(f"成功导入智能体: {agent_result.id}")
