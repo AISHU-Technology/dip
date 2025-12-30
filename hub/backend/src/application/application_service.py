@@ -19,7 +19,7 @@ from packaging import version as pkg_version
 import yaml
 
 from src.domains.application import (
-    Application, OntologyInfo, AgentInfo, ManifestInfo, MicroAppInfo,
+    Application, ManifestInfo, MicroAppInfo,
     OntologyConfigItem, AgentConfigItem
 )
 from src.ports.application_port import ApplicationPort
@@ -118,67 +118,97 @@ class ApplicationService:
         """
         return await self._application_port.get_application_by_id(app_id)
 
-    async def get_application_ontologies(
+    async def get_application_ontologies_by_id(
         self,
         app_id: int,
         auth_token: Optional[str] = None,
-    ) -> List[OntologyInfo]:
+    ) -> List[dict]:
         """
-        获取应用的业务知识网络配置。
+        获取应用的业务知识网络详情列表。
+
+        流程：
+        1. 通过 id 获取应用的业务知识网络配置项（ontology_config）
+        2. 遍历配置项，通过 id 调用外部接口查询业务知识网络详情
+        3. 返回业务知识网络详情列表（原始数据）
 
         参数:
             app_id: 应用主键 ID
+            auth_token: 认证 Token
 
         返回:
-            List[OntologyInfo]: 业务知识网络信息列表
+            List[dict]: 业务知识网络详情列表（原始数据）
 
         异常:
             ValueError: 当应用不存在时抛出
         """
+        # 1. 通过 id 获取应用
         application = await self._application_port.get_application_by_id(app_id)
         
+        # 2. 遍历配置项，通过 id 调用外部接口查询详情
         ontologies = []
         for config_item in application.ontology_config:
             try:
                 if self._ontology_manager_port:
-                    kn_info = await self._ontology_manager_port.get_knowledge_network(
+                    # 调用外部接口查询业务知识网络详情（返回原始数据）
+                    kn_data = await self._ontology_manager_port.get_knowledge_network(
                         str(config_item.id),
                         auth_token=auth_token,
                     )
-                    ontologies.append(OntologyInfo(
-                        id=config_item.id,
-                        name=kn_info.name,
-                        description=kn_info.comment,
-                    ))
+                    ontologies.append(kn_data)
                 else:
-                    # 如果没有外部服务端口，只返回 ID
-                    ontologies.append(OntologyInfo(id=config_item.id))
+                    # 如果没有外部服务端口，返回基本信息
+                    ontologies.append({"id": str(config_item.id)})
             except Exception as e:
                 logger.warning(f"获取业务知识网络详情失败 (ID: {config_item.id}): {e}")
-                ontologies.append(OntologyInfo(id=config_item.id))
+                # 即使查询失败，也返回基本信息
+                ontologies.append({"id": str(config_item.id)})
         
         return ontologies
 
-    async def get_application_agents(self, app_id: int) -> List[AgentInfo]:
+    async def get_application_agents_by_id(
+        self,
+        app_id: int,
+        auth_token: Optional[str] = None,
+    ) -> List[dict]:
         """
-        获取应用的智能体配置。
+        获取应用的智能体详情列表。
+
+        流程：
+        1. 通过 id 获取应用的智能体配置项（agent_config）
+        2. 遍历配置项，通过 id 调用外部接口查询智能体详情
+        3. 返回智能体详情列表（原始数据）
 
         参数:
             app_id: 应用主键 ID
+            auth_token: 认证 Token
 
         返回:
-            List[AgentInfo]: 智能体信息列表
+            List[dict]: 智能体详情列表（原始数据）
 
         异常:
             ValueError: 当应用不存在时抛出
         """
+        # 1. 通过 id 获取应用
         application = await self._application_port.get_application_by_id(app_id)
         
+        # 2. 遍历配置项，通过 id 调用外部接口查询详情
         agents = []
         for config_item in application.agent_config:
-            # 智能体详情需要从 Agent Factory 获取
-            # 目前 Agent Factory 没有提供查询接口，只返回 ID
-            agents.append(AgentInfo(id=config_item.id))
+            try:
+                if self._agent_factory_port:
+                    # 调用外部接口查询智能体详情（返回原始数据）
+                    agent_data = await self._agent_factory_port.get_agent(
+                        str(config_item.id),
+                        auth_token=auth_token,
+                    )
+                    agents.append(agent_data)
+                else:
+                    # 如果没有外部服务端口，返回基本信息
+                    agents.append({"id": str(config_item.id)})
+            except Exception as e:
+                logger.warning(f"获取智能体详情失败 (ID: {config_item.id}): {e}")
+                # 即使查询失败，也返回基本信息
+                agents.append({"id": str(config_item.id)})
         
         return agents
 

@@ -14,7 +14,7 @@ info:
     - **查看基础信息**: GET /applications/basic-info - 查看应用基本信息
     - **查看业务知识网络**: GET /applications/ontologies - 查看业务知识网络配置
     - **查看智能体**: GET /applications/agents - 查看智能体配置
-    - **卸载应用**: DELETE /applications/{key} - 卸载指定应用
+    - **卸载应用**: DELETE /applications/{id} - 卸载指定应用
   version: 1.0.0
   contact:
     name: DIP Hub Team
@@ -60,8 +60,8 @@ paths:
     $ref: "./hub/hub.paths.yaml#/paths/~1applications~1agents"
 
   # 5、卸载应用
-  /applications/{key}:
-    $ref: "./hub/hub.paths.yaml#/paths/~1applications~1{key}"
+  /applications/{id}:
+    $ref: "./hub/hub.paths.yaml#/paths/~1applications~1{id}"
 
   # ============ 登录认证接口 ============
   /login:

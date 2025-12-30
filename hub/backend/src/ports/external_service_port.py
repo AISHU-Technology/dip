@@ -51,6 +51,14 @@ class AgentFactoryResult:
     version: str
 
 
+@dataclass
+class AgentInfo:
+    """Agent 信息。"""
+    id: str
+    name: Optional[str] = None
+    description: Optional[str] = None
+
+
 class DeployInstallerPort(ABC):
     """
     Deploy Installer 服务端口接口。
@@ -151,7 +159,7 @@ class OntologyManagerPort(ABC):
         self,
         kn_id: str,
         auth_token: Optional[str] = None,
-    ) -> KnowledgeNetworkInfo:
+    ) -> dict:
         """
         获取业务知识网络详情。
 
@@ -159,7 +167,7 @@ class OntologyManagerPort(ABC):
             kn_id: 业务知识网络 ID
 
         返回:
-            KnowledgeNetworkInfo: 业务知识网络信息
+            dict: 业务知识网络信息（原始数据）
 
         异常:
             ValueError: 当业务知识网络不存在时抛出
@@ -188,8 +196,28 @@ class AgentFactoryPort(ABC):
     """
     Agent Factory 服务端口接口。
 
-    负责与 Agent Factory 服务交互，处理智能体的创建。
+    负责与 Agent Factory 服务交互，处理智能体的创建和查询。
     """
+
+    @abstractmethod
+    async def get_agent(
+        self,
+        agent_id: str,
+        auth_token: Optional[str] = None,
+    ) -> dict:
+        """
+        获取智能体详情。
+
+        参数:
+            agent_id: 智能体 ID
+
+        返回:
+            dict: 智能体信息（原始数据）
+
+        异常:
+            ValueError: 当智能体不存在时抛出
+        """
+        pass
 
     @abstractmethod
     async def create_agent(

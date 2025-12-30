@@ -198,7 +198,7 @@ class MockOntologyManagerAdapter(OntologyManagerPort):
         self,
         kn_id: str,
         auth_token: Optional[str] = None,
-    ) -> KnowledgeNetworkInfo:
+    ) -> dict:
         """
         模拟获取业务知识网络详情。
 
@@ -206,14 +206,20 @@ class MockOntologyManagerAdapter(OntologyManagerPort):
             kn_id: 业务知识网络 ID
 
         返回:
-            KnowledgeNetworkInfo: 业务知识网络信息
+            dict: 业务知识网络信息（原始数据）
 
         异常:
             ValueError: 当业务知识网络不存在时抛出
         """
         if kn_id in self._knowledge_networks:
             logger.info(f"[Mock] 获取业务知识网络: {kn_id}")
-            return self._knowledge_networks[kn_id]
+            kn_info = self._knowledge_networks[kn_id]
+            # 返回原始数据格式
+            return {
+                "id": kn_info.id,
+                "name": kn_info.name,
+                "comment": kn_info.comment,
+            }
         
         logger.warning(f"[Mock] 业务知识网络不存在: {kn_id}")
         raise ValueError(f"业务知识网络不存在: {kn_id}")
@@ -270,6 +276,35 @@ class MockAgentFactoryAdapter(AgentFactoryPort):
         self._next_id = 2
         
         logger.info("Mock Agent Factory 适配器已初始化")
+
+    async def get_agent(
+        self,
+        agent_id: str,
+        auth_token: Optional[str] = None,
+    ) -> dict:
+        """
+        模拟获取智能体详情。
+
+        参数:
+            agent_id: 智能体 ID
+
+        返回:
+            dict: 智能体信息（原始数据）
+
+        异常:
+            ValueError: 当智能体不存在时抛出
+        """
+        if agent_id not in self._agents:
+            raise ValueError(f"智能体不存在: {agent_id}")
+        
+        agent_data = self._agents[agent_id]
+        
+        # 返回原始数据格式
+        return {
+            "id": agent_data["id"],
+            "name": agent_data.get("name"),
+            "profile": agent_data.get("description", f"智能体 {agent_data['id']} 的描述"),
+        }
 
     async def create_agent(
         self,

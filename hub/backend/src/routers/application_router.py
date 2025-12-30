@@ -16,10 +16,6 @@ from src.routers.schemas.application import (
     ApplicationResponse,
     ApplicationBasicInfoResponse,
     MicroAppResponse,
-    OntologyListResponse,
-    OntologyInfoResponse,
-    AgentListResponse,
-    AgentInfoResponse,
     OntologyConfigItemResponse,
     AgentConfigItemResponse,
     ErrorResponse,
@@ -324,7 +320,6 @@ def create_application_router(application_service: ApplicationService) -> APIRou
         "/applications/ontologies",
         summary="查看业务知识网络配置",
         description="查看应用的业务知识网络配置情况",
-        response_model=OntologyListResponse,
         responses={
             200: {"description": "获取业务知识网络配置成功"},
             400: {"description": "请求参数错误", "model": ErrorResponse},
@@ -335,40 +330,35 @@ def create_application_router(application_service: ApplicationService) -> APIRou
     async def get_application_ontologies(
         request: Request,
         id: int = Query(..., description="应用主键 ID", ge=1),
-    ) -> OntologyListResponse:
+    ):
         """
         查看业务知识网络配置。
 
         流程：
-        1. 查询应用的业务知识网络 IDs
-        2. 遍历查询业务知识网络详情获取名称、描述
+        1. 通过 id 获取应用的业务知识网络配置项（ontology_config）
+        2. 遍历配置项，通过 id 调用外部接口查询业务知识网络详情
+        3. 返回业务知识网络详情列表（原始数据）
 
         参数:
             id: 应用主键 ID
 
         返回:
-            OntologyListResponse: 业务知识网络列表
+            List[dict]: 业务知识网络详情列表（原始数据）
         """
         try:
             # 认证 Token 已由中间件统一提取并存储到 request.state 和 TokenContext
             # 适配器层会从 TokenContext 统一获取，这里可以不再传递
             auth_token = getattr(request.state, "auth_token", None)
 
-            ontologies = await application_service.get_application_ontologies(
+            # 1. 通过 id 获取应用的业务知识网络配置项
+            # 2. 遍历配置项，通过 id 调用外部接口查询详情
+            # 3. 返回业务知识网络详情列表（原始数据）
+            ontologies = await application_service.get_application_ontologies_by_id(
                 app_id=id,
-                auth_token=auth_token,  # 保留参数以保持兼容性
+                auth_token=auth_token,
             )
             
-            return OntologyListResponse(
-                ontologies=[
-                    OntologyInfoResponse(
-                        id=onto.id,
-                        name=onto.name,
-                        description=onto.description,
-                    )
-                    for onto in ontologies
-                ]
-            )
+            return ontologies
         
         except ValueError as e:
             raise HTTPException(
@@ -393,7 +383,6 @@ def create_application_router(application_service: ApplicationService) -> APIRou
         "/applications/agents",
         summary="查看智能体配置",
         description="查看应用的 Data Agent 智能体配置情况",
-        response_model=AgentListResponse,
         responses={
             200: {"description": "获取智能体配置成功"},
             400: {"description": "请求参数错误", "model": ErrorResponse},
@@ -402,34 +391,37 @@ def create_application_router(application_service: ApplicationService) -> APIRou
         }
     )
     async def get_application_agents(
+        request: Request,
         id: int = Query(..., description="应用主键 ID", ge=1),
-    ) -> AgentListResponse:
+    ):
         """
         查看智能体配置。
 
         流程：
-        1. 查询应用的 Data Agent 智能体 IDs
-        2. 查询 Data Agent 智能体详情
+        1. 通过 id 获取应用的智能体配置项（agent_config）
+        2. 遍历配置项，通过 id 调用外部接口查询智能体详情
+        3. 返回智能体详情列表（原始数据）
 
         参数:
             id: 应用主键 ID
 
         返回:
-            AgentListResponse: 智能体列表
+            List[dict]: 智能体详情列表（原始数据）
         """
         try:
-            agents = await application_service.get_application_agents(id)
-            
-            return AgentListResponse(
-                agents=[
-                    AgentInfoResponse(
-                        id=agent.id,
-                        name=agent.name,
-                        description=agent.description,
-                    )
-                    for agent in agents
-                ]
+            # 认证 Token 已由中间件统一提取并存储到 request.state 和 TokenContext
+            # 适配器层会从 TokenContext 统一获取，这里可以不再传递
+            auth_token = getattr(request.state, "auth_token", None)
+
+            # 1. 通过 id 获取应用的智能体配置项
+            # 2. 遍历配置项，通过 id 调用外部接口查询详情
+            # 3. 返回智能体详情列表（原始数据）
+            agents = await application_service.get_application_agents_by_id(
+                app_id=id,
+                auth_token=auth_token,
             )
+            
+            return agents
         
         except ValueError as e:
             raise HTTPException(

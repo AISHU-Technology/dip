@@ -16,7 +16,6 @@ from src.ports.external_service_port import (
     ChartInfo,
     ChartUploadResult,
     ReleaseResult,
-    KnowledgeNetworkInfo,
     AgentFactoryResult,
 )
 from src.infrastructure.config.settings import Settings
@@ -319,7 +318,7 @@ class OntologyManagerAdapter(OntologyManagerPort):
         self,
         kn_id: str,
         auth_token: Optional[str] = None,
-    ) -> KnowledgeNetworkInfo:
+    ) -> dict:
         """
         获取业务知识网络详情。
 
@@ -327,7 +326,7 @@ class OntologyManagerAdapter(OntologyManagerPort):
             kn_id: 业务知识网络 ID
 
         返回:
-            KnowledgeNetworkInfo: 业务知识网络信息
+            dict: 业务知识网络信息（原始数据）
 
         异常:
             ValueError: 当业务知识网络不存在时抛出
@@ -357,11 +356,7 @@ class OntologyManagerAdapter(OntologyManagerPort):
             )
             raise
         
-        return KnowledgeNetworkInfo(
-            id=data.get("id", kn_id),
-            name=data.get("name", ""),
-            comment=data.get("comment"),
-        )
+        return data
 
     async def create_knowledge_network(
         self,
@@ -419,6 +414,50 @@ class AgentFactoryAdapter(AgentFactoryPort):
         self._settings = settings
         self._base_url = f"{settings.agent_factory_url}/api/agent-factory/v3"
         self._timeout = settings.agent_factory_timeout
+
+    async def get_agent(
+        self,
+        agent_id: str,
+        auth_token: Optional[str] = None,
+    ) -> dict:
+        """
+        获取智能体详情。
+
+        参数:
+            agent_id: 智能体 ID
+
+        返回:
+            dict: 智能体信息（原始数据）
+
+        异常:
+            ValueError: 当智能体不存在时抛出
+        """
+        url = f"{self._base_url}/agent/{agent_id}"
+        
+        headers = _build_headers(auth_token)
+
+        try:
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                response = await client.get(url, headers=headers or None)
+                
+                if response.status_code == 404:
+                    raise ValueError(f"智能体不存在: {agent_id}")
+                
+                response.raise_for_status()
+                data = response.json()
+        except ValueError:
+            raise
+        except Exception as e:
+            _handle_http_error(
+                "get_agent",
+                url,
+                e,
+                self._settings.agent_factory_url,
+                self._timeout,
+            )
+            raise
+        
+        return data
 
     async def create_agent(
         self,
