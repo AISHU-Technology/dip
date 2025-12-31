@@ -81,9 +81,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
             : container
 
         if (!targetContainer) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('容器元素不存在:', container)
-          }
+          console.log('容器元素不存在:', container)
           return
         }
 
@@ -142,14 +140,12 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
     const hasFailed = microAppLoadFailureManager.hasFailed(appIdStr)
     const isPageReload = microAppLoadFailureManager.isPageReload()
 
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[微应用加载] 检查失败状态:`, {
-        appId: appIdStr,
-        hasFailed,
-        isPageReload,
-        pageLoadTime: microAppLoadFailureManager.getPageLoadTime(),
-      })
-    }
+    console.log(`[微应用加载] 检查失败状态:`, {
+      appId: appIdStr,
+      hasFailed,
+      isPageReload,
+      pageLoadTime: microAppLoadFailureManager.getPageLoadTime(),
+    })
 
     if (hasFailed) {
       const failureInfo = microAppLoadFailureManager.getFailureInfo(appIdStr)
@@ -162,12 +158,10 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
         })
         setLoading(false)
         clearContainer() // 确保容器为空
-        if (process.env.NODE_ENV === 'development') {
-          console.log(
-            `[微应用加载] 检测到之前的失败记录，跳过加载: ${failureInfo.appName} (${appBasicInfo.id})`,
-            isPageReload ? '(页面刷新后恢复)' : '(组件重新渲染)'
-          )
-        }
+        console.log(
+          `[微应用加载] 检测到之前的失败记录，跳过加载: ${failureInfo.appName} (${appBasicInfo.id})`,
+          isPageReload ? '(页面刷新后恢复)' : '(组件重新渲染)'
+        )
         return
       }
     }
@@ -184,9 +178,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
 
     const microAppEntry = appBasicInfo.micro_app.entry
     if (!microAppEntry) {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('微应用入口不存在:', appBasicInfo)
-      }
+      console.log('微应用入口不存在:', appBasicInfo)
       setLoading(false)
       message.error('微应用配置错误：缺少入口地址')
       return
@@ -199,9 +191,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
           await microAppRef.current.unmount()
           microAppRef.current = null
         } catch (err) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('卸载旧微应用实例时出错:', err)
-          }
+          console.log('卸载旧微应用实例时出错:', err)
           microAppRef.current = null
         }
       }
@@ -216,14 +206,12 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
     if (hashIndex !== -1) {
       const originalUrl = entryUrl
       entryUrl = entryUrl.substring(0, hashIndex)
-      if (process.env.NODE_ENV === 'development') {
-        console.log(
-          'entry 包含路由 hash，已自动移除:',
-          originalUrl,
-          '->',
-          entryUrl
-        )
-      }
+      console.log(
+        'entry 包含路由 hash，已自动移除:',
+        originalUrl,
+        '->',
+        entryUrl
+      )
     }
 
     // 异步加载流程
@@ -242,9 +230,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
       }
 
       // 开发环境：调试信息
-      if (process.env.NODE_ENV === 'development') {
-        console.log('加载微应用:', { name: microAppName, entry: entryUrl })
-      }
+      console.log('加载微应用:', { name: microAppName, entry: entryUrl })
 
       // 加载微应用
       // 使用 ref 获取最新的 props，避免闭包问题
@@ -263,20 +249,16 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
         await microAppInstance.mountPromise
         if (isMounted) {
           setLoading(false)
-          if (process.env.NODE_ENV === 'development') {
-            console.log('微应用加载成功:', microAppName)
-          }
+          console.log('微应用加载成功:', microAppName)
         }
       } catch (err) {
         if (isMounted) {
           setLoading(false)
-          if (process.env.NODE_ENV === 'development') {
-            console.log('微应用加载失败:', {
-              name: microAppName,
-              entry: entryUrl,
-              error: err,
-            })
-          }
+          console.log('微应用加载失败:', {
+            name: microAppName,
+            entry: entryUrl,
+            error: err,
+          })
 
           // 清理 qiankun wrapper，避免残留
           try {
@@ -284,9 +266,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
               await microAppInstance.unmount()
             }
           } catch (unmountErr) {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('清理失败微应用时出错:', unmountErr)
-            }
+            console.log('清理失败微应用时出错:', unmountErr)
           } finally {
             // 无论卸载是否成功，都清空容器内容
             clearContainer()
@@ -311,12 +291,10 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
             entry: entryUrl,
           })
 
-          if (process.env.NODE_ENV === 'development') {
-            console.log(
-              '失败信息:',
-              microAppLoadFailureManager.getFailureInfo(appIdStr)?.error
-            )
-          }
+          console.log(
+            '失败信息:',
+            microAppLoadFailureManager.getFailureInfo(appIdStr)?.error
+          )
         }
       }
     }
@@ -334,9 +312,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
         try {
           root.unmount()
         } catch (err) {
-          if (process.env.NODE_ENV === 'development') {
-            console.log('清理 AppMenu 渲染实例时出错:', err)
-          }
+          console.log('清理 AppMenu 渲染实例时出错:', err)
         }
       })
       appMenuRootRef.current.clear()
@@ -355,9 +331,7 @@ const MicroAppComponent = ({ appBasicInfo }: MicroAppComponentProps) => {
             clearContainer()
           })
           .catch((err) => {
-            if (process.env.NODE_ENV === 'development') {
-              console.log('微应用卸载时出错:', err)
-            }
+            console.log('微应用卸载时出错:', err)
             if (microAppRef.current === currentInstance) {
               microAppRef.current = null
             }
