@@ -284,36 +284,56 @@ class ApplicationService:
         异常:
             ValueError: 当安装包格式错误或版本冲突时抛出
         """
+        logger.info(f"[install_application] 开始安装应用，updated_by: {updated_by}")
         temp_dir = None
         try:
             # 创建临时目录
             temp_base = self._settings.temp_dir if self._settings else "/tmp/dip-hub"
             os.makedirs(temp_base, exist_ok=True)
             temp_dir = tempfile.mkdtemp(dir=temp_base)
+            logger.info(f"[install_application] 创建临时目录: {temp_dir}")
             
             # 保存 zip 文件
             zip_path = os.path.join(temp_dir, "package.zip")
             with open(zip_path, "wb") as f:
                 shutil.copyfileobj(zip_data, f)
+            zip_size = os.path.getsize(zip_path)
+            logger.info(f"[install_application] ZIP 文件已保存: {zip_path}, 大小: {zip_size} bytes")
             
             # 解压 zip 文件
             extract_dir = os.path.join(temp_dir, "extracted")
-            with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-                zip_ref.extractall(extract_dir)
+            logger.info(f"[install_application] 开始解压 ZIP 文件到: {extract_dir}")
+            try:
+                with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+                    file_list = zip_ref.namelist()
+                    logger.info(f"[install_application] ZIP 文件包含 {len(file_list)} 个文件/目录")
+                    logger.debug(f"[install_application] ZIP 文件列表: {file_list[:10]}..." if len(file_list) > 10 else f"[install_application] ZIP 文件列表: {file_list}")
+                    zip_ref.extractall(extract_dir)
+                logger.info(f"[install_application] ZIP 文件解压完成")
+            except zipfile.BadZipFile as e:
+                logger.error(f"[install_application] ZIP 文件格式错误: {e}", exc_info=True)
+                raise ValueError(f"无效的 ZIP 文件格式: {str(e)}")
+            except Exception as e:
+                logger.error(f"[install_application] 解压 ZIP 文件失败: {e}", exc_info=True)
+                raise ValueError(f"解压 ZIP 文件失败: {str(e)}")
             
             # 查找 manifest.yaml 文件
+            logger.info(f"[install_application] 开始查找 manifest.yaml 文件")
             # 1. 先在根目录查找
             manifest_path = os.path.join(extract_dir, "manifest.yaml")
             if not os.path.exists(manifest_path):
                 manifest_path = os.path.join(extract_dir, "manifest.yml")
+                logger.debug(f"[install_application] 根目录未找到 manifest.yaml，尝试 manifest.yml")
             
             # 2. 如果根目录没有，查找 application.key 文件所在的目录
             if not os.path.exists(manifest_path):
+                logger.debug(f"[install_application] 根目录未找到 manifest，开始查找 application.key")
                 # 查找 application.key 文件
                 app_key_path = None
                 for root, dirs, files in os.walk(extract_dir):
                     if "application.key" in files:
                         app_key_path = root
+                        logger.debug(f"[install_application] 找到 application.key 在: {app_key_path}")
                         break
                 
                 if app_key_path:
@@ -321,93 +341,166 @@ class ApplicationService:
                     manifest_path = os.path.join(app_key_path, "manifest.yaml")
                     if not os.path.exists(manifest_path):
                         manifest_path = os.path.join(app_key_path, "manifest.yml")
+                    logger.debug(f"[install_application] 在 application.key 所在目录查找 manifest: {manifest_path}")
             
             # 3. 如果还是没找到，递归查找所有 manifest.yaml 文件
             if not os.path.exists(manifest_path):
+                logger.debug(f"[install_application] 开始递归查找 manifest.yaml")
                 for root, dirs, files in os.walk(extract_dir):
                     if "manifest.yaml" in files:
                         manifest_path = os.path.join(root, "manifest.yaml")
+                        logger.debug(f"[install_application] 递归找到 manifest.yaml: {manifest_path}")
                         break
                     elif "manifest.yml" in files:
                         manifest_path = os.path.join(root, "manifest.yml")
+                        logger.debug(f"[install_application] 递归找到 manifest.yml: {manifest_path}")
                         break
             
             if not os.path.exists(manifest_path):
+                logger.error(f"[install_application] 未找到 manifest.yaml 文件，解压目录内容: {os.listdir(extract_dir) if os.path.exists(extract_dir) else '目录不存在'}")
                 raise ValueError("安装包缺少 manifest.yaml 文件")
+            
+            logger.info(f"[install_application] 找到 manifest.yaml: {manifest_path}")
             
             # 获取 manifest.yaml 所在的目录，作为应用包的根目录
             manifest_dir = os.path.dirname(manifest_path)
+            logger.info(f"[install_application] 应用包根目录: {manifest_dir}")
             
-            with open(manifest_path, "r", encoding="utf-8") as f:
-                manifest_data = yaml.safe_load(f)
+            # 读取并解析 manifest.yaml
+            logger.info(f"[install_application] 开始读取 manifest.yaml")
+            try:
+                with open(manifest_path, "r", encoding="utf-8") as f:
+                    manifest_content = f.read()
+                    logger.debug(f"[install_application] manifest.yaml 内容:\n{manifest_content}")
+                    manifest_data = yaml.safe_load(manifest_content)
+                    if not manifest_data:
+                        raise ValueError("manifest.yaml 文件为空或格式错误")
+            except yaml.YAMLError as e:
+                logger.error(f"[install_application] manifest.yaml 解析失败: {e}", exc_info=True)
+                raise ValueError(f"manifest.yaml 解析失败: {str(e)}")
+            except Exception as e:
+                logger.error(f"[install_application] 读取 manifest.yaml 失败: {e}", exc_info=True)
+                raise ValueError(f"读取 manifest.yaml 失败: {str(e)}")
             
-            manifest = self._parse_manifest(manifest_data)
+            logger.info(f"[install_application] manifest.yaml 解析成功，开始解析 manifest 数据")
+            try:
+                manifest = self._parse_manifest(manifest_data)
+                logger.info(f"[install_application] manifest 解析成功: key={manifest.key}, name={manifest.name}, version={manifest.version}")
+            except Exception as e:
+                logger.error(f"[install_application] manifest 解析失败: {e}", exc_info=True)
+                raise
             
             # 校验版本
+            logger.info(f"[install_application] 开始校验版本，key: {manifest.key}, version: {manifest.version}")
             existing_app = await self._application_port.get_application_by_key_optional(manifest.key)
             if existing_app:
+                logger.info(f"[install_application] 应用已存在: key={manifest.key}, 当前版本={existing_app.version}, 新版本={manifest.version}")
                 if manifest.version == existing_app.version:
-                    raise ValueError(
-                        f"版本号冲突: 新版本 {manifest.version} 与已安装版本相同。"
-                        f"请更新版本号或先卸载现有应用 (key: {manifest.key})"
-                    )
+                    error_msg = f"版本号冲突: 新版本 {manifest.version} 与已安装版本相同。请更新版本号或先卸载现有应用 (key: {manifest.key})"
+                    logger.error(f"[install_application] {error_msg}")
+                    raise ValueError(error_msg)
                 if not self._is_version_greater(manifest.version, existing_app.version):
-                    raise ValueError(
-                        f"版本号冲突: 新版本 {manifest.version} 必须大于已安装版本 {existing_app.version}。"
-                        f"当前已安装版本: {existing_app.version} (key: {manifest.key})"
-                    )
+                    error_msg = f"版本号冲突: 新版本 {manifest.version} 必须大于已安装版本 {existing_app.version}。当前已安装版本: {existing_app.version} (key: {manifest.key})"
+                    logger.error(f"[install_application] {error_msg}")
+                    raise ValueError(error_msg)
                 logger.info(
-                    f"版本校验通过: 新版本 {manifest.version} > 已安装版本 {existing_app.version} (key: {manifest.key})"
+                    f"[install_application] 版本校验通过: 新版本 {manifest.version} > 已安装版本 {existing_app.version} (key: {manifest.key})"
                 )
+            else:
+                logger.info(f"[install_application] 应用不存在，将创建新应用: key={manifest.key}")
             
             # 读取图标（路径相对于 manifest.yaml 所在目录）
+            logger.info(f"[install_application] 开始读取图标，icon_path: {manifest.icon_path}")
             icon_base64 = None
             if manifest.icon_path:
                 icon_full_path = os.path.join(manifest_dir, manifest.icon_path)
+                logger.debug(f"[install_application] 图标完整路径: {icon_full_path}")
                 if os.path.exists(icon_full_path):
-                    with open(icon_full_path, "rb") as f:
-                        icon_base64 = base64.b64encode(f.read()).decode("utf-8")
+                    try:
+                        with open(icon_full_path, "rb") as f:
+                            icon_data = f.read()
+                            icon_base64 = base64.b64encode(icon_data).decode("utf-8")
+                            logger.info(f"[install_application] 图标读取成功，大小: {len(icon_data)} bytes")
+                    except Exception as e:
+                        logger.warning(f"[install_application] 读取图标失败: {e}", exc_info=True)
+                else:
+                    logger.warning(f"[install_application] 图标文件不存在: {icon_full_path}")
             
             # 上传镜像（路径相对于 manifest.yaml 所在目录）
+            logger.info(f"[install_application] 开始处理镜像，镜像数量: {len(manifest.images)}")
             release_configs = []
             if self._deploy_installer_port:
-                for image_path in manifest.images:
+                for idx, image_path in enumerate(manifest.images, 1):
                     image_full_path = os.path.join(manifest_dir, image_path)
+                    logger.info(f"[install_application] 处理镜像 [{idx}/{len(manifest.images)}]: {image_path}")
+                    logger.debug(f"[install_application] 镜像完整路径: {image_full_path}")
                     if os.path.exists(image_full_path):
-                        with open(image_full_path, "rb") as f:
-                            await self._deploy_installer_port.upload_image(f, auth_token=auth_token)
+                        try:
+                            file_size = os.path.getsize(image_full_path)
+                            logger.info(f"[install_application] 开始上传镜像: {image_path}, 大小: {file_size} bytes")
+                            with open(image_full_path, "rb") as f:
+                                await self._deploy_installer_port.upload_image(f, auth_token=auth_token)
+                            logger.info(f"[install_application] 镜像上传成功: {image_path}")
+                        except Exception as e:
+                            logger.error(f"[install_application] 镜像上传失败 ({image_path}): {e}", exc_info=True)
+                            raise ValueError(f"镜像上传失败 ({image_path}): {str(e)}")
+                    else:
+                        logger.error(f"[install_application] 镜像文件不存在: {image_full_path}")
+                        raise ValueError(f"镜像文件不存在: {image_path}")
                 
                 # 上传 Chart 并安装（路径相对于 manifest.yaml 所在目录）
-                for chart_config in manifest.charts:
+                logger.info(f"[install_application] 开始处理 Chart，Chart 数量: {len(manifest.charts)}")
+                for idx, chart_config in enumerate(manifest.charts, 1):
                     chart_path = chart_config.get("path", "")
+                    logger.info(f"[install_application] 处理 Chart [{idx}/{len(manifest.charts)}]: {chart_path}")
                     chart_full_path = os.path.join(manifest_dir, chart_path)
+                    logger.debug(f"[install_application] Chart 完整路径: {chart_full_path}")
                     if os.path.exists(chart_full_path):
-                        with open(chart_full_path, "rb") as f:
-                            chart_result = await self._deploy_installer_port.upload_chart(f, auth_token=auth_token)
-                        
-                        # 安装 release
-                        release_name = chart_config.get("release_name", chart_result.chart.name)
-                        namespace = chart_config.get("namespace", "anyshare")
-                        values = chart_result.values
-                        
-                        await self._deploy_installer_port.install_release(
-                            release_name=release_name,
-                            namespace=namespace,
-                            chart_name=chart_result.chart.name,
-                            chart_version=chart_result.chart.version,
-                            values=values,
-                            auth_token=auth_token,
-                        )
-                        release_configs.append(release_name)
+                        try:
+                            file_size = os.path.getsize(chart_full_path)
+                            logger.info(f"[install_application] 开始上传 Chart: {chart_path}, 大小: {file_size} bytes")
+                            with open(chart_full_path, "rb") as f:
+                                chart_result = await self._deploy_installer_port.upload_chart(f, auth_token=auth_token)
+                            logger.info(f"[install_application] Chart 上传成功: {chart_result.chart.name} v{chart_result.chart.version}")
+                            
+                            # 安装 release
+                            release_name = chart_config.get("release_name", chart_result.chart.name)
+                            namespace = chart_config.get("namespace", "anyshare")
+                            values = chart_result.values
+                            logger.info(f"[install_application] 开始安装 Release: name={release_name}, namespace={namespace}, chart={chart_result.chart.name} v{chart_result.chart.version}")
+                            
+                            await self._deploy_installer_port.install_release(
+                                release_name=release_name,
+                                namespace=namespace,
+                                chart_name=chart_result.chart.name,
+                                chart_version=chart_result.chart.version,
+                                values=values,
+                                auth_token=auth_token,
+                            )
+                            release_configs.append(release_name)
+                            logger.info(f"[install_application] Release 安装成功: {release_name}")
+                        except Exception as e:
+                            logger.error(f"[install_application] Chart 处理失败 ({chart_path}): {e}", exc_info=True)
+                            raise ValueError(f"Chart 处理失败 ({chart_path}): {str(e)}")
+                    else:
+                        logger.error(f"[install_application] Chart 文件不存在: {chart_full_path}")
+                        raise ValueError(f"Chart 文件不存在: {chart_path}")
+            else:
+                logger.warning(f"[install_application] Deploy Installer 端口未配置，跳过镜像和 Chart 上传")
             
             # 导入业务知识网络（从 ontologies 目录读取 JSON 文件）
+            logger.info(f"[install_application] 开始导入业务知识网络，business_domain: {manifest.business_domain}")
             ontology_config = []
             if self._ontology_manager_port:
                 ontologies_dir = os.path.join(manifest_dir, "ontologies")
+                logger.debug(f"[install_application] 业务知识网络目录: {ontologies_dir}")
                 if os.path.exists(ontologies_dir) and os.path.isdir(ontologies_dir):
-                    for filename in os.listdir(ontologies_dir):
+                    files = os.listdir(ontologies_dir)
+                    logger.info(f"[install_application] ontologies 目录包含 {len(files)} 个文件: {files}")
+                    for filename in files:
                         if filename.endswith(('.json', '.yaml', '.yml')):
                             ontology_file_path = os.path.join(ontologies_dir, filename)
+                            logger.info(f"[install_application] 处理业务知识网络文件: {filename}")
                             try:
                                 with open(ontology_file_path, "r", encoding="utf-8") as f:
                                     if filename.endswith('.json'):
@@ -415,7 +508,8 @@ class ApplicationService:
                                     else:
                                         onto_config = yaml.safe_load(f)
                                 
-                                logger.info(f"从文件读取业务知识网络配置: {filename}")
+                                logger.debug(f"[install_application] 业务知识网络配置内容: {onto_config}")
+                                logger.info(f"[install_application] 开始创建业务知识网络: {filename}")
                                 onto_id = await self._ontology_manager_port.create_knowledge_network(
                                     onto_config,
                                     auth_token=auth_token,
@@ -426,18 +520,36 @@ class ApplicationService:
                                         id=str(onto_id),
                                         is_config=False,  # 安装时默认为未配置
                                     ))
-                                    logger.info(f"成功导入业务知识网络: {onto_id}")
+                                    logger.info(f"[install_application] 成功导入业务知识网络: {filename} -> ID: {onto_id}")
+                                else:
+                                    logger.warning(f"[install_application] 业务知识网络创建返回空 ID: {filename}")
+                            except json.JSONDecodeError as e:
+                                logger.error(f"[install_application] 业务知识网络 JSON 解析失败 ({filename}): {e}", exc_info=True)
+                                raise ValueError(f"业务知识网络配置文件格式错误 ({filename}): {str(e)}")
+                            except yaml.YAMLError as e:
+                                logger.error(f"[install_application] 业务知识网络 YAML 解析失败 ({filename}): {e}", exc_info=True)
+                                raise ValueError(f"业务知识网络配置文件格式错误 ({filename}): {str(e)}")
                             except Exception as e:
-                                logger.warning(f"导入业务知识网络失败 ({filename}): {e}")
+                                logger.error(f"[install_application] 导入业务知识网络失败 ({filename}): {e}", exc_info=True)
+                                raise ValueError(f"导入业务知识网络失败 ({filename}): {str(e)}")
+                else:
+                    logger.info(f"[install_application] ontologies 目录不存在或不是目录，跳过业务知识网络导入")
+            else:
+                logger.warning(f"[install_application] Ontology Manager 端口未配置，跳过业务知识网络导入")
             
             # 导入智能体（从 agents 目录读取 JSON 文件）
+            logger.info(f"[install_application] 开始导入智能体，business_domain: {manifest.business_domain}")
             agent_config = []
             if self._agent_factory_port:
                 agents_dir = os.path.join(manifest_dir, "agents")
+                logger.debug(f"[install_application] 智能体目录: {agents_dir}")
                 if os.path.exists(agents_dir) and os.path.isdir(agents_dir):
-                    for filename in os.listdir(agents_dir):
+                    files = os.listdir(agents_dir)
+                    logger.info(f"[install_application] agents 目录包含 {len(files)} 个文件: {files}")
+                    for filename in files:
                         if filename.endswith(('.json', '.yaml', '.yml')):
                             agent_file_path = os.path.join(agents_dir, filename)
+                            logger.info(f"[install_application] 处理智能体文件: {filename}")
                             try:
                                 with open(agent_file_path, "r", encoding="utf-8") as f:
                                     if filename.endswith('.json'):
@@ -445,7 +557,8 @@ class ApplicationService:
                                     else:
                                         agent_config_data = yaml.safe_load(f)
                                 
-                                logger.info(f"从文件读取智能体配置: {filename}")
+                                logger.debug(f"[install_application] 智能体配置内容: {agent_config_data}")
+                                logger.info(f"[install_application] 开始创建智能体: {filename}")
                                 agent_result = await self._agent_factory_port.create_agent(
                                     agent_config_data,
                                     auth_token=auth_token,
@@ -456,11 +569,28 @@ class ApplicationService:
                                         id=str(agent_result.id),
                                         is_config=False,  # 安装时默认为未配置
                                     ))
-                                    logger.info(f"成功导入智能体: {agent_result.id}")
+                                    logger.info(f"[install_application] 成功导入智能体: {filename} -> ID: {agent_result.id}, version: {agent_result.version}")
+                                else:
+                                    logger.warning(f"[install_application] 智能体创建返回空 ID: {filename}")
+                            except json.JSONDecodeError as e:
+                                logger.error(f"[install_application] 智能体 JSON 解析失败 ({filename}): {e}", exc_info=True)
+                                raise ValueError(f"智能体配置文件格式错误 ({filename}): {str(e)}")
+                            except yaml.YAMLError as e:
+                                logger.error(f"[install_application] 智能体 YAML 解析失败 ({filename}): {e}", exc_info=True)
+                                raise ValueError(f"智能体配置文件格式错误 ({filename}): {str(e)}")
                             except Exception as e:
-                                logger.warning(f"导入智能体失败 ({filename}): {e}")
+                                logger.error(f"[install_application] 导入智能体失败 ({filename}): {e}", exc_info=True)
+                                raise ValueError(f"导入智能体失败 ({filename}): {str(e)}")
+                else:
+                    logger.info(f"[install_application] agents 目录不存在或不是目录，跳过智能体导入")
+            else:
+                logger.warning(f"[install_application] Agent Factory 端口未配置，跳过智能体导入")
             
             # 创建或更新应用
+            logger.info(f"[install_application] 开始创建/更新应用记录")
+            logger.info(f"[install_application] 应用信息: key={manifest.key}, name={manifest.name}, version={manifest.version}")
+            logger.info(f"[install_application] 配置统计: releases={len(release_configs)}, ontologies={len(ontology_config)}, agents={len(agent_config)}")
+            
             application = Application(
                 id=existing_app.id if existing_app else 0,
                 key=manifest.key,
@@ -479,17 +609,41 @@ class ApplicationService:
                 updated_at=datetime.now(),
             )
             
-            if existing_app:
-                # 更新现有应用
-                return await self._application_port.update_application(application)
-            else:
-                # 创建新应用
-                return await self._application_port.create_application(application)
+            try:
+                if existing_app:
+                    # 更新现有应用
+                    logger.info(f"[install_application] 更新现有应用: key={manifest.key}")
+                    result = await self._application_port.update_application(application)
+                    logger.info(f"[install_application] 应用更新成功: id={result.id}, key={result.key}")
+                else:
+                    # 创建新应用
+                    logger.info(f"[install_application] 创建新应用: key={manifest.key}")
+                    result = await self._application_port.create_application(application)
+                    logger.info(f"[install_application] 应用创建成功: id={result.id}, key={result.key}")
+                
+                logger.info(f"[install_application] 应用安装完成: key={manifest.key}, name={manifest.name}")
+                return result
+            except Exception as e:
+                logger.error(f"[install_application] 保存应用记录失败: {e}", exc_info=True)
+                raise ValueError(f"保存应用记录失败: {str(e)}")
         
+        except ValueError as e:
+            # ValueError 是预期的业务异常，记录错误但不记录堆栈
+            logger.error(f"[install_application] 应用安装失败 (业务错误): {str(e)}")
+            raise
+        except Exception as e:
+            # 其他未预期的异常，记录详细堆栈
+            logger.error(f"[install_application] 应用安装失败 (未预期错误): {e}", exc_info=True)
+            raise ValueError(f"应用安装失败: {str(e)}")
         finally:
             # 清理临时目录
             if temp_dir and os.path.exists(temp_dir):
-                shutil.rmtree(temp_dir, ignore_errors=True)
+                logger.debug(f"[install_application] 清理临时目录: {temp_dir}")
+                try:
+                    shutil.rmtree(temp_dir, ignore_errors=True)
+                    logger.debug(f"[install_application] 临时目录清理完成")
+                except Exception as e:
+                    logger.warning(f"[install_application] 清理临时目录失败: {e}")
 
     async def uninstall_application(
         self,

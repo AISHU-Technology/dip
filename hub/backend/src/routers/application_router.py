@@ -103,10 +103,13 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             ApplicationResponse: 安装后的应用信息
         """
         try:
+            logger.info("[install_application] 收到应用安装请求")
             # 读取请求体（流式上传的 zip 数据）
             body = await request.body()
+            logger.info(f"[install_application] 请求体大小: {len(body)} bytes")
             
             if not body:
+                logger.error("[install_application] 请求体为空")
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail={
@@ -118,11 +121,14 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             # 从上下文获取用户信息（由中间件通过token内省获取）
             user_info = get_user_info()
             updated_by = user_info.id if user_info else request.headers.get("X-User-Id", "system")
+            logger.info(f"[install_application] 更新者: {updated_by}")
             # 认证 Token 已由中间件统一提取并存储到 request.state 和 TokenContext
             # 适配器层会从 TokenContext 统一获取，这里可以不再传递
             auth_token = getattr(request.state, "auth_token", None)
+            logger.debug(f"[install_application] 认证 Token: {'已提供' if auth_token else '未提供'}")
             
             # 调用服务安装应用
+            logger.info("[install_application] 开始调用应用服务安装应用")
             zip_data = io.BytesIO(body)
             application = await application_service.install_application(
                 zip_data=zip_data,
@@ -130,6 +136,7 @@ def create_application_router(application_service: ApplicationService) -> APIRou
                 auth_token=auth_token,  # 保留参数以保持兼容性
             )
             
+            logger.info(f"[install_application] 应用安装成功: key={application.key}, id={application.id}")
             return _application_to_response(application)
         
         except HTTPException:
@@ -137,6 +144,7 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             raise
         except ValueError as e:
             error_msg = str(e)
+            logger.error(f"[install_application] 应用安装失败 (ValueError): {error_msg}", exc_info=True)
             if "版本" in error_msg:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
@@ -150,6 +158,15 @@ def create_application_router(application_service: ApplicationService) -> APIRou
                 detail={
                     "code": "INVALID_PACKAGE",
                     "description": error_msg,
+                }
+            )
+        except Exception as e:
+            logger.error(f"[install_application] 应用安装失败 (未预期错误): {e}", exc_info=True)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "code": "INTERNAL_ERROR",
+                    "description": f"应用安装失败: {str(e)}",
                 }
             )
         except Exception as e:
