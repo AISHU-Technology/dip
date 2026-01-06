@@ -317,85 +317,26 @@ class ApplicationService:
                 logger.error(f"[install_application] 解压 ZIP 文件失败: {e}", exc_info=True)
                 raise ValueError(f"解压 ZIP 文件失败: {str(e)}")
             
-            # 查找 manifest.yaml 和 application.key 文件
-            logger.info(f"[install_application] 开始查找 manifest.yaml 和 application.key 文件")
-            manifest_path = None
-            app_key_path = None
+            # 查找 manifest.yaml（从解压目录逐层查找）
+            # 应用包结构：manifest.yaml 同层有 application.key、packages/、ontologies/、agents/
+            logger.info(f"[install_application] 开始逐层查找 manifest.yaml 文件")
+            manifest_path = self._find_file_bfs(extract_dir, ["manifest.yaml", "manifest.yml"])
             
-            # 1. 先在根目录查找
-            manifest_path = os.path.join(extract_dir, "manifest.yaml")
-            if not os.path.exists(manifest_path):
-                manifest_path = os.path.join(extract_dir, "manifest.yml")
-                logger.debug(f"[install_application] 根目录未找到 manifest.yaml，尝试 manifest.yml")
-            
-            # 同时查找 application.key
-            app_key_path = os.path.join(extract_dir, "application.key")
-            if not os.path.exists(app_key_path):
-                app_key_path = None
-            
-            # 2. 如果根目录没有，查找 application.key 文件所在的目录
-            if not os.path.exists(manifest_path) or not app_key_path:
-                logger.debug(f"[install_application] 根目录未找到完整文件，开始查找 application.key")
-                # 查找 application.key 文件
-                found_app_key_path = None
-                for root, dirs, files in os.walk(extract_dir):
-                    if "application.key" in files:
-                        found_app_key_path = os.path.join(root, "application.key")
-                        logger.debug(f"[install_application] 找到 application.key 在: {found_app_key_path}")
-                        if not app_key_path:
-                            app_key_path = found_app_key_path
-                        break
-                
-                if found_app_key_path and not os.path.exists(manifest_path):
-                    # 在 application.key 所在目录查找 manifest.yaml
-                    app_key_dir = os.path.dirname(found_app_key_path)
-                    manifest_path = os.path.join(app_key_dir, "manifest.yaml")
-                    if not os.path.exists(manifest_path):
-                        manifest_path = os.path.join(app_key_dir, "manifest.yml")
-                    logger.debug(f"[install_application] 在 application.key 所在目录查找 manifest: {manifest_path}")
-            
-            # 3. 如果还是没找到 manifest.yaml，递归查找所有 manifest.yaml 文件
-            if not os.path.exists(manifest_path):
-                logger.debug(f"[install_application] 开始递归查找 manifest.yaml")
-                for root, dirs, files in os.walk(extract_dir):
-                    if "manifest.yaml" in files:
-                        manifest_path = os.path.join(root, "manifest.yaml")
-                        logger.debug(f"[install_application] 递归找到 manifest.yaml: {manifest_path}")
-                        break
-                    elif "manifest.yml" in files:
-                        manifest_path = os.path.join(root, "manifest.yml")
-                        logger.debug(f"[install_application] 递归找到 manifest.yml: {manifest_path}")
-                        break
-            
-            if not os.path.exists(manifest_path):
+            if not manifest_path:
                 logger.error(f"[install_application] 未找到 manifest.yaml 文件，解压目录内容: {os.listdir(extract_dir) if os.path.exists(extract_dir) else '目录不存在'}")
                 raise ValueError("安装包缺少 manifest.yaml 文件")
             
             logger.info(f"[install_application] 找到 manifest.yaml: {manifest_path}")
             
-            # 获取 manifest.yaml 所在的目录，作为应用包的根目录
+            # manifest.yaml 所在目录即为应用包根目录，同层包含 application.key、packages/、ontologies/、agents/
             manifest_dir = os.path.dirname(manifest_path)
             logger.info(f"[install_application] 应用包根目录: {manifest_dir}")
             
-            # 读取 application.key 文件获取应用唯一标识
-            logger.info(f"[install_application] 开始查找并读取 application.key 文件")
-            
-            # 如果之前没找到，在 manifest.yaml 所在目录查找
-            if not app_key_path or not os.path.exists(app_key_path):
-                app_key_path = os.path.join(manifest_dir, "application.key")
-            
-            # 如果还是不存在，递归查找
+            # application.key 与 manifest.yaml 同层
+            app_key_path = os.path.join(manifest_dir, "application.key")
             if not os.path.exists(app_key_path):
-                logger.debug(f"[install_application] manifest 目录未找到 application.key，开始递归查找")
-                for root, dirs, files in os.walk(extract_dir):
-                    if "application.key" in files:
-                        app_key_path = os.path.join(root, "application.key")
-                        logger.debug(f"[install_application] 递归找到 application.key: {app_key_path}")
-                        break
-            
-            if not app_key_path or not os.path.exists(app_key_path):
-                logger.error(f"[install_application] 未找到 application.key 文件")
-                raise ValueError("安装包缺少 application.key 文件")
+                logger.error(f"[install_application] 未找到 application.key 文件，应在 manifest.yaml 同层目录: {manifest_dir}")
+                raise ValueError("安装包缺少 application.key 文件（应与 manifest.yaml 同层）")
             
             logger.info(f"[install_application] 找到 application.key: {app_key_path}")
             try:
@@ -813,6 +754,45 @@ class ApplicationService:
             ValueError: 当应用不存在时抛出
         """
         return await self._application_port.delete_application(key)
+
+    def _find_file_bfs(self, root_dir: str, filenames: list) -> Optional[str]:
+        """
+        从指定目录逐层（广度优先）查找文件。
+
+        参数:
+            root_dir: 搜索起始目录
+            filenames: 要查找的文件名列表（按优先级排序）
+
+        返回:
+            Optional[str]: 找到的文件完整路径，未找到返回 None
+        """
+        from collections import deque
+        
+        queue = deque([root_dir])
+        
+        while queue:
+            current_dir = queue.popleft()
+            
+            try:
+                entries = os.listdir(current_dir)
+            except PermissionError:
+                continue
+            
+            # 在当前目录查找目标文件
+            for filename in filenames:
+                if filename in entries:
+                    file_path = os.path.join(current_dir, filename)
+                    if os.path.isfile(file_path):
+                        logger.debug(f"[_find_file_bfs] 在 {current_dir} 找到文件: {filename}")
+                        return file_path
+            
+            # 将子目录加入队列
+            for entry in entries:
+                entry_path = os.path.join(current_dir, entry)
+                if os.path.isdir(entry_path):
+                    queue.append(entry_path)
+        
+        return None
 
     def _parse_manifest(self, data: dict, app_key: str) -> ManifestInfo:
         """
