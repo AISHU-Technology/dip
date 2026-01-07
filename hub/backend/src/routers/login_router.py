@@ -358,9 +358,10 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
         # 设置 Cookie 并返回（与 session 服务一致）
         if session_info.as_redirect:
             # 与 session 服务一致：301 重定向
-            response = RedirectResponse(
-                url=session_info.as_redirect,
-                status_code=status.HTTP_301_MOVED_PERMANENTLY,
+            success_path = _get_frontend_path(session_info.as_redirect)
+            response = HTMLResponse(
+                content=_redirect_html(success_path),
+                status_code=status.HTTP_200_OK,
             )
         else:
             # 不区分平台，统一返回 login-success（与 session 服务 LogSuccessHTML 对应）
