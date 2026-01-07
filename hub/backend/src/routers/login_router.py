@@ -131,7 +131,7 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
     )
     async def login(
         request: Request,
-        asredirect: str | None = Query(default=None, alias="ASRedirect", description="AnyShare 重定向地址"),
+        asredirect: str | None = Query(default=None, alias="asredirect", description="dip 重定向地址"),
     ):
         """
         登录接口（严格按照 session 服务 Login 函数逻辑）。
