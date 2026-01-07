@@ -98,7 +98,7 @@ depServices:
     timeout: 300
   # Ontology Manager 服务配置
   ontology-manager:
-    url: http://ontology-manager:13014
+    url: http://ontology-manager-svc:13014
     timeout: 60
   # Agent Factory 服务配置
   agent-factory:
