@@ -31,7 +31,7 @@ function Content({ iframeHeight, width = 560 }: ContentProps) {
     <iframe
       src={loginUrl}
       ref={iframeRef}
-      className="border-none bg-white"
+      className="border-none"
       style={{ height: `${iframeHeight}px`, width: widthStyle }}
       title="登录"
     />
