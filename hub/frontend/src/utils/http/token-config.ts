@@ -1,5 +1,6 @@
 import axios from 'axios'
 import Cookies from 'js-cookie'
+import { removeBasePath } from '@/routes/utils'
 import { BASE_PATH, getFullPath, normalizePath } from '@/utils/config'
 
 export interface HttpConfig {
@@ -88,11 +89,12 @@ const onTokenExpired = (_code?: number) => {
 
   const isRootPath = normalizedCurrentPathname === normalizedBasePath
 
-  // 跳转到登录页面，并携带当前路径作为重定向地址
+  // 跳转到登录页面，并携带当前路径作为重定向地址（去掉 BASE_PATH 前缀）
   // 注意：如果是根路径，不传递 asredirect，让后端重定向到 login-success，由前端处理首页跳转
+  const redirectPath = removeBasePath(currentPath)
   const loginUrl = isRootPath
     ? loginPath
-    : `${loginPath}?asredirect=${encodeURIComponent(currentPath)}`
+    : `${loginPath}?asredirect=${encodeURIComponent(redirectPath)}`
   window.location.replace(loginUrl)
 }
 
