@@ -157,7 +157,11 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
                 if token_effect:
                     # Token 有效，直接返回成功页面或重定向（与 session 服务一致：301）
                     if asredirect:
-                        return RedirectResponse(url=asredirect, status_code=status.HTTP_301_MOVED_PERMANENTLY)
+                        response = RedirectResponse(url=asredirect, status_code=status.HTTP_301_MOVED_PERMANENTLY)
+                        # Go gin c.Redirect 在返回 301/302 时会自动设置 Location header，
+                        # FastAPI 的 RedirectResponse 也如此，但可另外模拟 gin 的行为：明确设置 Location
+                        response.headers["Location"] = asredirect
+                        return response
                     else:
                         # 不区分平台，统一返回 login-success（与 session 服务 LogSuccessHTML 对应）
                         success_path = _get_frontend_path("login-success")
