@@ -44,7 +44,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const buildLoginUrl = (path: string) =>
     path === '/' || path === getFullPath('/')
       ? '/login'
-      : `/login?asredirect=${encodeURIComponent(getFullPath(path))}`
+      : `/login?asredirect=${encodeURIComponent(path)}`
 
   // 初始化时检查并获取用户信息（不在登录页面时才获取）
   useEffect(() => {
