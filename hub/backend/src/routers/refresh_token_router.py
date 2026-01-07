@@ -6,7 +6,8 @@
 """
 import logging
 from urllib.parse import quote
-from fastapi import APIRouter, Request, Response, HTTPException, status
+from fastapi import APIRouter, Request, Response, status
+from src.infrastructure.exceptions import ValidationError
 from fastapi.responses import JSONResponse
 
 from src.application.refresh_token_service import RefreshTokenService
@@ -86,9 +87,10 @@ def create_refresh_token_router(
             token = _get_cookie_value(request, "dip.oauth2_token")
             
             if not session_id or not token:
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={"code": "GET_COOKIE_VALUE_NOT_EXIST", "description": "Session ID 或 Token 不存在"},
+                raise ValidationError(
+                    code="GET_COOKIE_VALUE_NOT_EXIST",
+                    description="Session ID 或 Token 不存在",
+                    solution="请先登录",
                 )
 
             # 执行刷新
@@ -117,15 +119,17 @@ def create_refresh_token_router(
 
         except ValueError as e:
             logger.error(f"刷新 Token 失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "REFRESH_TOKEN_ERROR", "description": f"刷新 Token 失败: {str(e)}"},
+            raise ValidationError(
+                code="REFRESH_TOKEN_ERROR",
+                description=f"刷新 Token 失败: {str(e)}",
+                solution="请重新登录",
             )
         except Exception as e:
             logger.exception(f"刷新 Token 异常: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "REFRESH_TOKEN_ERROR", "description": f"刷新 Token 失败: {str(e)}"},
+            raise ValidationError(
+                code="REFRESH_TOKEN_ERROR",
+                description=f"刷新 Token 失败: {str(e)}",
+                solution="请重新登录",
             )
 
     return router

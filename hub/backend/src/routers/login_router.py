@@ -7,7 +7,8 @@
 import logging
 import asyncio
 from urllib.parse import quote
-from fastapi import APIRouter, Query, Request, Response, HTTPException, status
+from fastapi import APIRouter, Query, Request, Response, status
+from src.infrastructure.exceptions import ValidationError
 from fastapi.responses import HTMLResponse, RedirectResponse
 from starlette.responses import Response as StarletteResponse
 
@@ -236,6 +237,8 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
             f"&response_type=code"
             f"&state={state}"
             f"&nonce={nonce}"
+            f"&lang=zh-cn"
+            f"&product=dip"
         )
 
         # 创建响应并设置 Cookie（与 session 服务一致：301 重定向）
@@ -306,9 +309,10 @@ def create_login_router(login_service: LoginService, settings: Settings = None) 
                     status_code=status.HTTP_200_OK,
                 )
             logger.error(f"LoginCallback req error or code empty  err: {error} ,code: {code}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "GET_CODE_FAILED", "description": "获取授权码失败"},
+            raise ValidationError(
+                code="GET_CODE_FAILED",
+                description="获取授权码失败",
+                solution="请重新登录",
             )
 
         logger.info(f"login callback Code:[{code}]")

@@ -6,7 +6,8 @@
 """
 import logging
 from urllib.parse import urlencode, quote
-from fastapi import APIRouter, Query, Request, Response, HTTPException, status
+from fastapi import APIRouter, Query, Request, Response, status
+from src.infrastructure.exceptions import ValidationError
 from fastapi.responses import HTMLResponse, RedirectResponse
 
 from src.application.logout_service import LogoutService, SSO_LOGIN
@@ -169,9 +170,9 @@ def create_logout_router(logout_service: LogoutService, settings: Settings = Non
             # 参数验证（与 session 项目一致：error 存在时返回 400 错误）
             if error:
                 logger.error(f"登出回调错误: {error} - {error_description}")
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={"code": "DO_LOGOUT_CALLBACK_FAILED", "description": f"登出回调失败: {error}"},
+                raise ValidationError(
+                    code="DO_LOGOUT_CALLBACK_FAILED",
+                    description=f"登出回调失败: {error}",
                 )
 
             # 执行登出回调

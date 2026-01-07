@@ -15,10 +15,13 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.exceptions import RequestValidationError
 
 from src.infrastructure.config.settings import get_settings, Settings
+from src.infrastructure.exceptions import BusinessException, create_error_response
 from src.infrastructure.container import init_container, get_container
 from src.infrastructure.logging.logger import setup_logging
 from src.infrastructure.middleware.auth_middleware import AuthMiddleware
@@ -102,6 +105,36 @@ def create_app(settings: Settings = None) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+    
+    # 注册全局异常处理器
+    @app.exception_handler(BusinessException)
+    async def business_exception_handler(request: Request, exc: BusinessException):
+        """处理业务异常，返回统一格式的错误响应。"""
+        return exc.to_response()
+    
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        """处理请求参数验证异常。"""
+        errors = exc.errors()
+        detail = {"validation_errors": errors} if errors else None
+        return create_error_response(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            code="VALIDATION_ERROR",
+            description="请求参数验证失败",
+            solution="请检查请求参数格式是否正确",
+            detail=detail,
+        )
+    
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
+        """处理未捕获的异常。"""
+        logger.exception(f"未捕获的异常: {exc}")
+        return create_error_response(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            code="INTERNAL_ERROR",
+            description="服务器内部错误",
+            solution="请稍后重试或联系管理员",
+        )
     
     # 注册路由
     health_router = create_health_router(container.health_service)

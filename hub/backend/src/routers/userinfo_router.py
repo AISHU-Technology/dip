@@ -5,7 +5,8 @@
 这是处理 HTTP 请求并委托给应用层的接口适配器。
 """
 import logging
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, status
+from src.infrastructure.exceptions import ValidationError, InternalError
 from fastapi.responses import JSONResponse
 
 from src.application.user_info_service import UserInfoService
@@ -43,9 +44,10 @@ def create_userinfo_router(user_info_service: UserInfoService) -> APIRouter:
             # 获取 Token
             auth_header = request.headers.get("Authorization")
             if not auth_header or not auth_header.startswith("Bearer "):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Authorization Header 格式错误",
+                raise ValidationError(
+                    code="INVALID_AUTH_HEADER",
+                    description="Authorization Header 格式错误",
+                    solution="请确保 Authorization Header 格式为 'Bearer <token>'",
                 )
             
             token = auth_header[7:]  # 去除 "Bearer " 前缀
@@ -86,15 +88,15 @@ def create_userinfo_router(user_info_service: UserInfoService) -> APIRouter:
 
         except ValueError as e:
             logger.error(f"获取用户信息失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "GET_USER_INFO_ERROR", "description": f"获取用户信息失败: {str(e)}"},
+            raise ValidationError(
+                code="GET_USER_INFO_ERROR",
+                description=f"获取用户信息失败: {str(e)}",
             )
         except Exception as e:
             logger.exception(f"获取用户信息异常: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={"code": "GET_USER_INFO_ERROR", "description": f"获取用户信息失败: {str(e)}"},
+            raise InternalError(
+                code="GET_USER_INFO_ERROR",
+                description=f"获取用户信息失败: {str(e)}",
             )
 
     return router

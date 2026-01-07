@@ -6,12 +6,15 @@
 """
 import io
 import logging
-from fastapi import APIRouter, HTTPException, status, Query, Path, Request
+from fastapi import APIRouter, Query, Path, Request, status
 from fastapi.responses import Response
 from typing import List
 
 from src.application.application_service import ApplicationService
 from src.infrastructure.context.token_context import get_user_info
+from src.infrastructure.exceptions import (
+    ValidationError, NotFoundError, ConflictError, InternalError
+)
 from src.routers.schemas.application import (
     ApplicationResponse,
     ApplicationBasicInfoResponse,
@@ -114,12 +117,10 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             
             if not body:
                 logger.error("[install_application] 请求体为空")
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail={
-                        "code": "INVALID_REQUEST",
-                        "description": "请求体不能为空",
-                    }
+                raise ValidationError(
+                    code="INVALID_REQUEST",
+                    description="请求体不能为空",
+                    solution="请上传有效的应用安装包（ZIP格式）",
                 )
             
             # 从上下文获取用户信息（由中间件通过token内省获取）
@@ -143,44 +144,28 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             logger.info(f"[install_application] 应用安装成功: key={application.key}, id={application.id}")
             return _application_to_response(application)
         
-        except HTTPException:
-            # 重新抛出 HTTPException，不再包装
+        except (ValidationError, ConflictError, InternalError):
+            # 重新抛出业务异常
             raise
         except ValueError as e:
             error_msg = str(e)
             logger.error(f"[install_application] 应用安装失败 (ValueError): {error_msg}", exc_info=True)
             if "版本" in error_msg:
-                raise HTTPException(
-                    status_code=status.HTTP_409_CONFLICT,
-                    detail={
-                        "code": "VERSION_CONFLICT",
-                        "description": error_msg,
-                    }
+                raise ConflictError(
+                    code="VERSION_CONFLICT",
+                    description=error_msg,
+                    solution="请使用更高版本的应用包或先卸载现有应用",
                 )
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail={
-                    "code": "INVALID_PACKAGE",
-                    "description": error_msg,
-                }
+            raise ValidationError(
+                code="INVALID_PACKAGE",
+                description=error_msg,
+                solution="请检查应用安装包格式是否正确",
             )
         except Exception as e:
             logger.error(f"[install_application] 应用安装失败 (未预期错误): {e}", exc_info=True)
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"应用安装失败: {str(e)}",
-                }
-            )
-        except Exception as e:
-            logger.exception(f"安装应用失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"安装应用失败: {str(e)}",
-                }
+            raise InternalError(
+                description=f"应用安装失败: {str(e)}",
+                solution="请稍后重试或联系管理员",
             )
 
     # ============ 2、获取应用列表 ============
@@ -208,12 +193,8 @@ def create_application_router(application_service: ApplicationService) -> APIRou
 
         except Exception as e:
             logger.exception(f"获取应用列表失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"获取应用列表失败: {str(e)}",
-                }
+            raise InternalError(
+                description=f"获取应用列表失败: {str(e)}",
             )
 
     # ============ 3、应用配置 ============
@@ -259,22 +240,10 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             return _application_to_response(application)
         
         except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "NOT_FOUND",
-                    "description": str(e),
-                }
-            )
+            raise NotFoundError(description=str(e))
         except Exception as e:
             logger.exception(f"配置应用失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"配置应用失败: {str(e)}",
-                }
-            )
+            raise InternalError(description=f"配置应用失败: {str(e)}")
 
     # ============ 4.1、查看基础信息 ============
     @router.get(
@@ -319,22 +288,10 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             )
         
         except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "NOT_FOUND",
-                    "description": str(e),
-                }
-            )
+            raise NotFoundError(description=str(e))
         except Exception as e:
             logger.exception(f"获取应用基础信息失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"获取应用基础信息失败: {str(e)}",
-                }
-            )
+            raise InternalError(description=f"获取应用基础信息失败: {str(e)}")
 
     # ============ 4.2、查看业务知识网络配置 ============
     @router.get(
@@ -382,22 +339,10 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             return ontologies
         
         except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "NOT_FOUND",
-                    "description": str(e),
-                }
-            )
+            raise NotFoundError(description=str(e))
         except Exception as e:
             logger.exception(f"获取业务知识网络配置失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"获取业务知识网络配置失败: {str(e)}",
-                }
-            )
+            raise InternalError(description=f"获取业务知识网络配置失败: {str(e)}")
 
     # ============ 4.3、查看智能体配置 ============
     @router.get(
@@ -445,22 +390,10 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             return agents
         
         except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "NOT_FOUND",
-                    "description": str(e),
-                }
-            )
+            raise NotFoundError(description=str(e))
         except Exception as e:
             logger.exception(f"获取智能体配置失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"获取智能体配置失败: {str(e)}",
-                }
-            )
+            raise InternalError(description=f"获取智能体配置失败: {str(e)}")
 
     # ============ 5、卸载应用 ============
     @router.delete(
@@ -504,21 +437,9 @@ def create_application_router(application_service: ApplicationService) -> APIRou
             return Response(status_code=status.HTTP_204_NO_CONTENT)
 
         except ValueError as e:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail={
-                    "code": "NOT_FOUND",
-                    "description": str(e),
-                }
-            )
+            raise NotFoundError(description=str(e))
         except Exception as e:
             logger.exception(f"卸载应用失败: {e}")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "code": "INTERNAL_ERROR",
-                    "description": f"卸载应用失败: {str(e)}",
-                }
-            )
+            raise InternalError(description=f"卸载应用失败: {str(e)}")
 
     return router
