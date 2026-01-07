@@ -25,7 +25,7 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
     setLoading(true)
     try {
       const data = await getApplicationsAgents(appId)
-      setAgents(data.agents || [])
+      setAgents(data || [])
     } catch (error: any) {
       if (error?.description) {
         message.error(error?.description)
@@ -70,8 +70,8 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
             <div className="text-center text-[--dip-text-color-secondary] py-8">暂无智能体配置</div>
           ) : (
             agents.map((item) => {
-              const prompt = item.prompt || ''
-              const skills = item.skills || []
+              const prompt = ''
+              const skills: any[] = []
 
               return (
                 <div
@@ -84,9 +84,9 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
                   </div>
 
                   {/* 描述 */}
-                  {item.description && (
+                  {item.profile && (
                     <div className="mb-3 text-xs leading-5 text-[--dip-text-color-45]">
-                      {item.description}
+                      {item.profile}
                     </div>
                   )}
 
@@ -105,10 +105,12 @@ const AgentConfig = ({ appId }: AgentConfigProps) => {
                     <div className="mb-3 flex flex-col gap-y-2">
                       <div className="text-xs leading-5 text-[--dip-text-color-65]">技能列表</div>
                       <div className="flex flex-col gap-y-1.5 pl-2">
-                        {skills.map((skill: string) => (
-                          <div key={`${item.id}-${skill}`} className="flex items-start gap-3.5">
+                        {skills.map((skill: any) => (
+                          <div key={skill.tool_id} className="flex items-start gap-3.5">
                             <div className="mt-2 h-1.5 w-1.5 rounded-full bg-[#D9D9D9] flex-shrink-0" />
-                            <div className="text-xs text-[--dip-text-color] leading-5">{skill}</div>
+                            <div className="text-xs text-[--dip-text-color] leading-5">
+                              {skill?.tool_name}
+                            </div>
                           </div>
                         ))}
                       </div>

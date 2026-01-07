@@ -26,7 +26,7 @@ const OntologyConfig = ({ appId }: OntologyConfigProps) => {
     setLoading(true)
     try {
       const data = await getApplicationsOntologies(appId)
-      setOntologies(data.ontologies || [])
+      setOntologies(data || [])
     } catch (error: any) {
       if (error?.description) {
         message.error(error?.description)
@@ -73,7 +73,7 @@ const OntologyConfig = ({ appId }: OntologyConfigProps) => {
             </div>
           ) : (
             ontologies.map((item) => {
-              const isConfigured = item.is_config ?? false
+              // const isConfigured = item?.is_config ?? false
 
               return (
                 <div
@@ -88,7 +88,7 @@ const OntologyConfig = ({ appId }: OntologyConfigProps) => {
                     >
                       {item.name || `业务知识网络 #${item.id}`}
                     </div>
-                    <Tag
+                    {/* <Tag
                       icon={isConfigured ? <CheckCircleOutlined /> : <InfoCircleOutlined />}
                       color={isConfigured ? 'success' : 'warning'}
                       className="m-0 rounded border flex-shrink-0"
@@ -101,16 +101,13 @@ const OntologyConfig = ({ appId }: OntologyConfigProps) => {
                       }}
                     >
                       {isConfigured ? '已配置' : '待配置'}
-                    </Tag>
+                    </Tag> */}
                   </div>
 
                   {/* 描述 */}
-                  {item.description && (
-                    <div
-                      className="text-xs text-[rgba(0,0,0,0.45)] flex-1 leading-5"
-                      title={item.description}
-                    >
-                      {item.description}
+                  {item.comment && (
+                    <div className="text-xs text-[rgba(0,0,0,0.45)] flex-1 leading-5">
+                      {item.comment}
                     </div>
                   )}
 

@@ -1,11 +1,9 @@
 import { del, get, post } from '@/utils/http'
 import type {
   AgentInfo,
-  AgentList,
   ApplicationBasicInfo,
   ApplicationInfo,
   OntologyInfo,
-  OntologyList,
   PinMicroAppParams,
   PinnedMicroAppsResponse,
 } from './index.d'
@@ -58,14 +56,14 @@ export const getApplicationsBasicInfo = (id?: number): Promise<ApplicationBasicI
  * 查看业务知识网络配置
  * OpenAPI: GET /applications/ontologies?app_id=xxx
  */
-export const getApplicationsOntologies = (id: number): Promise<OntologyList> =>
+export const getApplicationsOntologies = (id: number): Promise<OntologyInfo[]> =>
   get(`/api/dip-hub/v1/applications/ontologies`, { params: { id } })
 
 /**
  * 查看智能体配置
  * OpenAPI: GET /applications/agents?app_id=xxx
  */
-export const getApplicationsAgents = (id: number): Promise<AgentList> =>
+export const getApplicationsAgents = (id: number): Promise<AgentInfo[]> =>
   get(`/api/dip-hub/v1/applications/agents`, { params: { id } })
 
 /**
