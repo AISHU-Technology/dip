@@ -34,7 +34,7 @@ export const AppMenu = () => {
       Array.isArray(apps)
         ? apps.map((app) => ({
             key: app.id,
-            icon: <AppIcon icon={app.icon} name={app.name} size={16} className="shrink-0" />,
+            icon: <AppIcon icon={app.icon} name={app.name} size={16} />,
             label: app.name,
           }))
         : [],

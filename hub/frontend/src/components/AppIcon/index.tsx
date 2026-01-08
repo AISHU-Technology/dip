@@ -15,13 +15,23 @@ interface AppIconProps {
   className?: string
   /** 自定义样式 */
   style?: React.CSSProperties
+  /** 是否由边框 */
+  hasBorder?: boolean
 }
 
 /**
  * 应用图标组件
  * 支持显示 base64 图片，加载失败时自动 fallback 到 Avatar 显示首字母
  */
-const AppIcon = ({ icon, name, size = 24, shape = 'circle', className, style }: AppIconProps) => {
+const AppIcon = ({
+  icon,
+  name,
+  size = 24,
+  shape = 'circle',
+  className,
+  style,
+  hasBorder = false,
+}: AppIconProps) => {
   const [imageError, setImageError] = useState(false)
 
   // 如果没有图标或图片加载失败，使用 Avatar 显示首字母
@@ -41,7 +51,7 @@ const AppIcon = ({ icon, name, size = 24, shape = 'circle', className, style }: 
   // 判断 icon 是否已经是完整的 data URL
   const imageSrc = icon.startsWith('data:') ? icon : `data:image/png;base64,${icon}`
 
-  return (
+  return hasBorder ? (
     <Avatar
       size={size}
       shape={shape}
@@ -56,6 +66,14 @@ const AppIcon = ({ icon, name, size = 24, shape = 'circle', className, style }: 
           className="!object-scale-down"
         />
       }
+    />
+  ) : (
+    <img
+      src={imageSrc}
+      alt=""
+      onError={() => setImageError(true)}
+      className={clsx('!object-scale-down shrink-0', className)}
+      style={{ width: size, height: size }}
     />
   )
 }

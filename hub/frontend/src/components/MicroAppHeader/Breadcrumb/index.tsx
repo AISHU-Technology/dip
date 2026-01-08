@@ -47,7 +47,7 @@ export const Breadcrumb = ({ items = [], onNavigate }: BreadcrumbProps) => {
             {isHome ? (
               <button
                 type="button"
-                className="flex items-center justify-center w-7 h-7 rounded-md text-[--dip-text-color] hover:bg-[--dip-hover-bg-color]"
+                className="flex items-center justify-center w-6 h-6 rounded-md text-[--dip-text-color] hover:bg-[--dip-hover-bg-color]"
                 onClick={(e) => handleNavigate(item, e)}
               >
                 <IconFont type="icon-dip-back" className="!text-base" />
@@ -61,7 +61,7 @@ export const Breadcrumb = ({ items = [], onNavigate }: BreadcrumbProps) => {
                   <Button
                     size="small"
                     type="text"
-                    className="h-7 font-medium hover:!bg-transparent hover:!cursor-default"
+                    className="h-6 font-medium hover:!bg-transparent hover:!cursor-default"
                   >
                     {isRootItem && renderIcon(item.icon, item.name)}
                     {item.name}
@@ -69,7 +69,7 @@ export const Breadcrumb = ({ items = [], onNavigate }: BreadcrumbProps) => {
                 ) : (
                   <Button
                     size="small"
-                    className="h-7"
+                    className="h-6"
                     type="text"
                     onClick={(e) => handleNavigate(item, e)}
                   >

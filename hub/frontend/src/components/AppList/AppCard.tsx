@@ -47,7 +47,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, mode, width, onMenuClick }) => {
       <div className="flex gap-4 mb-2 flex-shrink-0">
         {/* 应用图标 */}
         <div className="w-16 h-16 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden">
-          <AppIcon icon={app.icon} name={app.name} size={64} className="w-full h-full" />
+          <AppIcon icon={app.icon} name={app.name} size={64} className="w-full h-full" hasBorder />
         </div>
         {/* 名称 + 版本号 + 描述 */}
         <div className="flex-1 min-w-0">
