@@ -93,10 +93,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         
         # 从请求头提取Authorization token
         auth_header = request.headers.get("Authorization")
-        auth_token = auth_header if auth_header else None
-        
-        # 对于需要认证的路径，如果没有token则拒绝访问
-        if not auth_token:
+        if not auth_header:
             logger.warning(f"请求路径 {path} 需要认证，但未提供token")
             error = UnauthorizedError(
                 description="访问此资源需要认证",
@@ -104,10 +101,25 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
             return error.to_response()
         
-        # 存储到request.state中，供路由层使用
-        request.state.auth_token = auth_token
+        # 提取纯token（去除 "Bearer " 前缀）
+        if auth_header.startswith("Bearer "):
+            auth_token = auth_header[7:]  # 去除 "Bearer " 前缀
+        else:
+            # 兼容直接传递token的情况
+            auth_token = auth_header
         
-        # 存储到TokenContext中，供适配器层统一获取
+        if not auth_token:
+            logger.warning(f"请求路径 {path} 需要认证，但token为空")
+            error = UnauthorizedError(
+                description="访问此资源需要认证",
+                solution="请在请求头中提供有效的Authorization token",
+            )
+            return error.to_response()
+        
+        # 存储完整的Authorization header到request.state中，供路由层使用
+        request.state.auth_token = auth_header
+        
+        # 存储纯token到TokenContext中，供适配器层统一获取
         TokenContext.set_token(auth_token)
         
         # 进行内省并获取用户信息
@@ -116,7 +128,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             # 获取容器以访问适配器
             container = get_container()
             
-            # 内省token获取用户ID
+            # 内省token获取用户ID（使用纯token）
             introspect = await container.hydra_adapter.introspect(auth_token)
             if introspect.active and introspect.visitor_id:
                 # 获取用户详细信息
