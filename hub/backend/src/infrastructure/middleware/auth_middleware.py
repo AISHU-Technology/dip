@@ -23,6 +23,7 @@ PUBLIC_PATHS = [
     "/login",
     "/login/callback",
     "/logout",
+    "/logout/callback",
     "/refresh-token",
     "/docs",
     "/redoc",
