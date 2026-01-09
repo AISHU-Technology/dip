@@ -5,8 +5,10 @@
 负责与 Deploy Installer、Ontology Manager、Agent Factory 服务交互。
 """
 import logging
+import asyncio
 from typing import List, BinaryIO, Optional
-import httpx
+import aiohttp
+from aiohttp import ClientError, ClientTimeout
 
 from src.ports.external_service_port import (
     DeployInstallerPort,
@@ -64,7 +66,7 @@ def _handle_http_error(
         service_url: 服务地址
         timeout: 超时时间
     """
-    if isinstance(e, httpx.ConnectError):
+    if isinstance(e, (aiohttp.ClientConnectorError, aiohttp.ClientConnectionError)):
         logger.error(
             f"[{operation}] 连接失败: 无法连接到 {url}\n"
             f"  错误详情: {e}\n"
@@ -76,13 +78,13 @@ def _handle_http_error(
             f"无法连接到服务: {url}。"
             f"请检查服务地址配置是否正确: {service_url}"
         ) from e
-    elif isinstance(e, httpx.TimeoutException):
+    elif isinstance(e, (aiohttp.ServerTimeoutError, asyncio.TimeoutError)):
         logger.error(f"[{operation}] 请求超时: {url}, timeout={timeout}s")
         raise TimeoutError(f"请求超时: {url} (超时时间: {timeout}s)") from e
-    elif isinstance(e, httpx.HTTPStatusError):
+    elif isinstance(e, aiohttp.ClientResponseError):
         logger.error(
-            f"[{operation}] HTTP 错误: {e.response.status_code}\n"
-            f"  响应内容: {e.response.text if e.response else '<no response>'}"
+            f"[{operation}] HTTP 错误: {e.status}\n"
+            f"  响应内容: {e.message if hasattr(e, 'message') else '<no message>'}"
         )
         raise
     else:
@@ -127,21 +129,25 @@ class DeployInstallerAdapter(DeployInstallerPort):
         headers["Content-Type"] = "application/octet-stream"
 
         try:
-            logger.info(f"[upload_image] 开始上传镜像到: {url}, timeout={self._timeout}s")
             # 确保文件指针在开头
             image_data.seek(0)
             # 读取文件内容
             content = image_data.read()
-            logger.debug(f"[upload_image] 镜像大小: {len(content)} bytes")
+            file_size = len(content)
+            logger.info(f"[upload_image] 开始上传镜像到: {url}, 大小: {file_size} bytes ({file_size / 1024 / 1024:.2f} MB), timeout={self._timeout}s")
             
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.put(
+            # 对于大文件，动态调整超时时间
+            calculated_timeout = max(self._timeout, 120 + (file_size // (1024 * 1024)) * 3)
+            timeout = ClientTimeout(total=calculated_timeout, connect=30.0)
+            
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.put(
                     url,
-                    content=content,
+                    data=content,
                     headers=headers,
-                )
-                response.raise_for_status()
-                data = response.json()
+                ) as response:
+                    response.raise_for_status()
+                    data = await response.json()
         except Exception as e:
             _handle_http_error(
                 "upload_image",
@@ -180,21 +186,25 @@ class DeployInstallerAdapter(DeployInstallerPort):
         headers["Content-Type"] = "application/octet-stream"
 
         try:
-            logger.info(f"[upload_chart] 开始上传 Chart 到: {url}, timeout={self._timeout}s")
             # 确保文件指针在开头
             chart_data.seek(0)
             # 读取文件内容
             content = chart_data.read()
-            logger.debug(f"[upload_chart] Chart 大小: {len(content)} bytes")
+            file_size = len(content)
+            logger.info(f"[upload_chart] 开始上传 Chart 到: {url}, 大小: {file_size} bytes ({file_size / 1024 / 1024:.2f} MB), timeout={self._timeout}s")
             
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.put(
+            # 对于大文件，动态调整超时时间
+            calculated_timeout = max(self._timeout, 120 + (file_size // (1024 * 1024)) * 3)
+            timeout = ClientTimeout(total=calculated_timeout, connect=30.0)
+            
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.put(
                     url,
-                    content=content,
+                    data=content,
                     headers=headers,
-                )
-                response.raise_for_status()
-                data = response.json()
+                ) as response:
+                    response.raise_for_status()
+                    data = await response.json()
         except Exception as e:
             _handle_http_error(
                 "upload_chart",
@@ -253,15 +263,16 @@ class DeployInstallerAdapter(DeployInstallerPort):
 
         try:
             logger.info(f"[install_release] 安装 Release: {url}, release_name={release_name}")
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(
+            timeout = ClientTimeout(total=self._timeout, connect=30.0)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(
                     url,
                     params=params,
                     json=body,
                     headers=headers or None,
-                )
-                response.raise_for_status()
-                data = response.json()
+                ) as response:
+                    response.raise_for_status()
+                    data = await response.json()
         except Exception as e:
             _handle_http_error(
                 "install_release",
@@ -297,10 +308,11 @@ class DeployInstallerAdapter(DeployInstallerPort):
 
         try:
             logger.info(f"[delete_release] 删除 Release: {url}, release_name={release_name}")
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.delete(url, params=params, headers=headers or None)
-                response.raise_for_status()
-                data = response.json()
+            timeout = ClientTimeout(total=self._timeout, connect=30.0)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.delete(url, params=params, headers=headers or None) as response:
+                    response.raise_for_status()
+                    data = await response.json()
         except Exception as e:
             _handle_http_error(
                 "delete_release",
@@ -357,14 +369,14 @@ class OntologyManagerAdapter(OntologyManagerPort):
         headers = _build_headers(auth_token, business_domain)
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.get(url, headers=headers or None)
-                
-                if response.status_code == 404:
-                    raise ValueError(f"业务知识网络不存在: {kn_id}")
-                
-                response.raise_for_status()
-                data = response.json()
+            timeout = ClientTimeout(total=self._timeout, connect=30.0)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(url, headers=headers or None) as response:
+                    if response.status == 404:
+                        raise ValueError(f"业务知识网络不存在: {kn_id}")
+                    
+                    response.raise_for_status()
+                    data = await response.json()
         except ValueError:
             raise
         except Exception as e:
@@ -401,10 +413,11 @@ class OntologyManagerAdapter(OntologyManagerPort):
         headers = _build_headers(auth_token, business_domain)
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(url, json=data, headers=headers or None)
-                response.raise_for_status()
-                result = response.json()
+            timeout = ClientTimeout(total=self._timeout, connect=30.0)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(url, json=data, headers=headers or None) as response:
+                    response.raise_for_status()
+                    result = await response.json()
         except Exception as e:
             _handle_http_error(
                 "create_knowledge_network",
@@ -464,14 +477,14 @@ class AgentFactoryAdapter(AgentFactoryPort):
         headers = _build_headers(auth_token, business_domain)
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.get(url, headers=headers or None)
-                
-                if response.status_code == 404:
-                    raise ValueError(f"智能体不存在: {agent_id}")
-                
-                response.raise_for_status()
-                data = response.json()
+            timeout = ClientTimeout(total=self._timeout, connect=30.0)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.get(url, headers=headers or None) as response:
+                    if response.status == 404:
+                        raise ValueError(f"智能体不存在: {agent_id}")
+                    
+                    response.raise_for_status()
+                    data = await response.json()
         except ValueError:
             raise
         except Exception as e:
@@ -508,10 +521,11 @@ class AgentFactoryAdapter(AgentFactoryPort):
         headers = _build_headers(auth_token, business_domain)
 
         try:
-            async with httpx.AsyncClient(timeout=self._timeout) as client:
-                response = await client.post(url, json=data, headers=headers or None)
-                response.raise_for_status()
-                result = response.json()
+            timeout = ClientTimeout(total=self._timeout, connect=30.0)
+            async with aiohttp.ClientSession(timeout=timeout) as session:
+                async with session.post(url, json=data, headers=headers or None) as response:
+                    response.raise_for_status()
+                    result = await response.json()
         except Exception as e:
             _handle_http_error(
                 "create_agent",
